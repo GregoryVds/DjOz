@@ -1,7 +1,7 @@
 % \define Debug
 
 % Vous ne pouvez pas utiliser le mot-clé 'declare'.
-local Interprete Projet Testing Music Transformations in
+local Interprete Projet Testing Music Transformations Lib in
    [Projet] = {Link ['Projet2014_mozart2.ozf']}
    {Browse Projet}
    % Si vous utilisez Mozart 1.4, remplacez la ligne précédente par celle-ci :
@@ -39,14 +39,45 @@ local Interprete Projet Testing Music Transformations in
    end  
 
    
+   % LIB MODULE
+   % - PositionInList
+   local
+      % Return the position of an element in a list.
+      % Arg: element to be matched and a list
+      % Return: position in list starting at 0 and -1 if not found
+      fun {PositionInList Elem List}
+	 fun {PositionInListAcc List Acc}
+	    case List
+	    of nil then 0
+	    [] H|T then
+	       if H==Elem then Acc else {PositionInListAcc T Acc+1} end
+	    end
+	 end
+      in
+	 {PositionInListAcc List 1}
+      end
+      \ifdef Debug
+      {Testing.assertEqual PositionInList [a [a b c]] 1}
+      {Testing.assertEqual PositionInList [b [a b c]] 2}
+      {Testing.assertEqual PositionInList [d [a b c]] 0}
+      \endif
+   in
+      Lib = 'export'(positionInList:PositionInList)
+   end
+   
+   
    % MUSIC MODULE
    % Holds a bunch of musical helper functions
    % - ExtendNote
    % - ComputeFrequency
    local
+      NotesList = [n(n:c a:none) n(n:c a:'#')  n(n:d a:none) n(n:d a:'#')  n(n:e a:none) n(n:f a:none)
+		   n(n:f a:'#')  n(n:g a:none) n(n:g a:'#')  n(n:a a:none) n(n:a a:'#')  n(n:b a:none)]
+      NotesListLength = {Length NotesList}
+      
       % Convert a note from to its extended notation
-      % Pre: Note in short notation (a, b3, b#4, silence)
-      % Post: Returns a note in its extended form like note(name:a octave:3 alteration:none)
+      % Arg: note in short notation (a, b3, b#4, silence)
+      % Returns: a note in its extended form like note(name:a octave:3 alteration:none)
       fun {ExtendNote Note}
 	 case Note
 	 of silence     then note(nom:silence octave:4 alteration:none)
@@ -67,32 +98,39 @@ local Interprete Projet Testing Music Transformations in
       {Testing.assertEqual ExtendNote silence note(nom:silence octave:4 alteration:none)}
       \endif
 
+      % Convert a note from its extended notation to its contracted notation
+      % Arg: note in its extended form like note(name:a octave:3 alteration:none)
+      % Returns: note in short notation (a, b3, b#4, silence)
+      fun {ContractNote ExtendedNote}
+	 case ExtendedNote
+	 of note(nom:silence octave:_ alteration:_)     then silence
+	 [] note(nom:Note octave:Octave alteration:'#') then Note#Octave
+	 [] note(nom:Note octave:Octave alteration:_)   then {StringToAtom {Append {AtomToString Note} {IntToString Octave}}}
+	 else raise cannotContractNote(ExtendedNote) end
+	 end
+      end
+      \ifdef Debug
+      {Testing.assertEqual ContractNote note(nom:a octave:0 alteration:none)  a0}
+      {Testing.assertEqual ContractNote note(nom:c octave:2 alteration:'#')  c#2}
+      {Testing.assertEqual ContractNote note(nom:c octave:4 alteration:none)  c4}
+      {Testing.assertEqual ContractNote note(nom:silence octave:4 alteration:none) silence}
+      \endif
+      
       % Compute the distance of the extended note from A
       % Notes in order are c c# d d# e f f# g g# a a# b
       % distance = a_position - note_position
       % Arg: note in extended notation but not silence
       % Return: a distance as integer from -9 to +2 included
       fun {ComputeDistanceFromA ExtendedNote}
-	 case ExtendedNote.nom
-	 of c andthen ExtendedNote.alteration == '#' then ~8
-	 [] c then ~9
-	 [] d andthen ExtendedNote.alteration == '#' then ~6
-	 [] d then ~7
-	 [] e then ~5
-	 [] f andthen ExtendedNote.alteration == '#' then ~3
-	 [] f then ~4
-	 [] g andthen ExtendedNote.alteration == '#' then ~1
-	 [] g then ~2
-	 [] a andthen ExtendedNote.alteration == '#' then 1
-	 [] a then 0
-	 [] b then 2
-	 [] silence then what_to_do_with_silence
-	 end     
+	 APosition = {Lib.positionInList n(n:a a:none) NotesList}
+	 NotePosition = {Lib.positionInList n(n:ExtendedNote.nom a:ExtendedNote.alteration) NotesList}
+      in
+	 NotePosition - APosition
       end
       \ifdef Debug
-      {Testing.assertEqual ComputeDistanceFromA note(nom:a octave:3 alteration:none) 0}
+      {Testing.assertEqual ComputeDistanceFromA note(nom:a octave:3 alteration:none)  0}
       {Testing.assertEqual ComputeDistanceFromA note(nom:c octave:2 alteration:'#')  ~8}
-      {Testing.assertEqual ComputeDistanceFromA note(nom:b octave:3 alteration:none) 2}
+      {Testing.assertEqual ComputeDistanceFromA note(nom:b octave:3 alteration:none)  2}
       {Testing.assertEqual ComputeDistanceFromA note(nom:d octave:3 alteration:none) ~7}
       \endif
       
@@ -105,16 +143,16 @@ local Interprete Projet Testing Music Transformations in
       in
 	 ExtendedNote = {ExtendNote Note}
 	 NoteDistance = {ComputeDistanceFromA ExtendedNote}
-	 OctaveDistance = (ExtendedNote.octave - 4) * 12
+	 OctaveDistance = (ExtendedNote.octave - 4) * NotesListLength
 	 OctaveDistance+NoteDistance
       end
       \ifdef Debug
-      {Testing.assertEqual CountHalfStepsFromA4 a   0}
+      {Testing.assertEqual CountHalfStepsFromA4 a     0}
       {Testing.assertEqual CountHalfStepsFromA4 b3  ~10}
       {Testing.assertEqual CountHalfStepsFromA4 d#1 ~42}
-      {Testing.assertEqual CountHalfStepsFromA4 e   ~5}
-      {Testing.assertEqual CountHalfStepsFromA4 f#4 ~3}
-      {Testing.assertEqual CountHalfStepsFromA4 a#4 1}
+      {Testing.assertEqual CountHalfStepsFromA4 e    ~5}
+      {Testing.assertEqual CountHalfStepsFromA4 f#4  ~3}
+      {Testing.assertEqual CountHalfStepsFromA4 a#4   1}
       {Testing.assertEqual CountHalfStepsFromA4 a#2 ~23}
       \endif
 
@@ -137,9 +175,9 @@ local Interprete Projet Testing Music Transformations in
       {Testing.assertEqual ComputeFrequency a       440}
       {Testing.assertEqual ComputeFrequency g#4     415}
       {Testing.assertEqual ComputeFrequency d#4     311}
-      {Testing.assertEqual ComputeFrequency d#2     78}
-      {Testing.assertEqual ComputeFrequency d2      73}
-      {Testing.assertEqual ComputeFrequency silence 0}
+      {Testing.assertEqual ComputeFrequency d#2      78}
+      {Testing.assertEqual ComputeFrequency d2       73}
+      {Testing.assertEqual ComputeFrequency silence   0}
       \endif
 
       % Convert a note to an echantillon
@@ -157,8 +195,70 @@ local Interprete Projet Testing Music Transformations in
       {Testing.assertEqual NoteToEchantillon d2       echantillon(hauteur:73  duree:1.0 instrument:none)}
       {Testing.assertEqual NoteToEchantillon silence  echantillon(hauteur:0   duree:1.0 instrument:none)}
       \endif
+      
+      % Transpose a note by a number of octave
+      % Arg: note in extended notation and number of octave to transpose.
+      % Return: transposed note in extended notation.
+      % Exception: raise if resulting octave must is < 0 or > 4.
+      fun {TransposeOctave OriginalNote OctaveSteps}
+	 TransposedOctave = OriginalNote.octave+OctaveSteps
+      in
+	 if (TransposedOctave < 0) then raise transposeGivesNegativeOctave end end
+	 if (TransposedOctave > 4) then raise transposeGivesOctaveOver4    end end
+	 note(nom:OriginalNote.nom octave:TransposedOctave alteration:OriginalNote.alteration)
+      end
+      \ifdef Debug
+      {Testing.assertEqual TransposeOctave [note(nom:a octave:3 alteration:none)  1] note(nom:a octave:4 alteration:none) }
+      {Testing.assertEqual TransposeOctave [note(nom:a octave:3 alteration:none) ~1] note(nom:a octave:2 alteration:none) }
+      {Testing.assertEqual TransposeOctave [note(nom:b octave:3 alteration:none) ~3] note(nom:b octave:0 alteration:none) }
+      \endif
+
+      % Transpose a note by a number of steps >= -11 and <= 11
+      % Arg: note in extended notation and number of halfSteps to transpose (>= -11 and <= 11)
+      % Return: transposed note in extended notation.
+      fun {TransposeNote OriginalNote HalfSteps}
+	 OriginalNotePos   = {Lib.positionInList n(n:OriginalNote.nom a:OriginalNote.alteration) NotesList}
+	 Temp              = (OriginalNotePos + HalfSteps) mod NotesListLength
+	 TransposedNotePos = if Temp==0 then NotesListLength else Temp end
+	 OctaveStep        = if (OriginalNotePos + HalfSteps) > NotesListLength then 1
+			     elseif (OriginalNotePos + HalfSteps) < 1 then ~1
+			     else 0 end
+	 TransposedNote    = {Nth NotesList TransposedNotePos}
+      in
+	 note(nom:TransposedNote.n octave:OriginalNote.octave+OctaveStep alteration:TransposedNote.a)
+      end
+      \ifdef Debug
+      {Testing.assertEqual TransposeNote [note(nom:a octave:3 alteration:none)   1] note(nom:a octave:3 alteration:'#') }
+      {Testing.assertEqual TransposeNote [note(nom:a octave:3 alteration:none)  ~1] note(nom:g octave:3 alteration:'#') }
+      {Testing.assertEqual TransposeNote [note(nom:a octave:3 alteration:none)   2] note(nom:b octave:3 alteration:none) }
+      {Testing.assertEqual TransposeNote [note(nom:a octave:3 alteration:none)   3] note(nom:c octave:4 alteration:none) }
+      \endif
+
+      % Transpose a note by a number half-steps
+      % Arg: note in short notation and number of halfSteps to transpose (>= -11 and <= 11)
+      % Return: transposed note in extended notation.
+      fun {Transpose OriginalNote HalfSteps}	 
+	 OctaveSteps  = HalfSteps div NotesListLength
+	 NoteSteps    = HalfSteps mod NotesListLength
+	 ExtendedNote = {ExtendNote OriginalNote}
+      in
+	 if HalfSteps == 0       then OriginalNote
+	 elseif OctaveSteps == 0 then {TransposeNote OriginalNote NoteSteps}
+	 elseif NoteSteps == 0   then {Browse ici} {TransposeOctave OriginalNote OctaveSteps}
+	 else {TransposeNote {TransposeOctave OriginalNote OctaveSteps} NoteSteps}
+	 end 
+      end
+      \ifdef Debug
+      {Testing.assertEqual Transpose [note(nom:a octave:3 alteration:none)  12]  note(nom:a octave:4 alteration:none) }
+      {Testing.assertEqual Transpose [note(nom:a octave:3 alteration:none) ~12]  note(nom:a octave:2 alteration:none) }
+      {Testing.assertEqual Transpose [note(nom:a octave:3 alteration:none)   1]  note(nom:a octave:3 alteration:'#')  }
+      {Testing.assertEqual Transpose [note(nom:a octave:3 alteration:none)   2]  note(nom:b octave:3 alteration:none) }
+      {Testing.assertEqual Transpose [note(nom:a octave:3 alteration:none)   3]  note(nom:c octave:4 alteration:none) }
+      {Testing.assertEqual Transpose [note(nom:g octave:2 alteration:'#')   ~5]  note(nom:d octave:2 alteration:'#')  }
+      {Testing.assertEqual Transpose [note(nom:g octave:4 alteration:'#')  ~26]  note(nom:f octave:2 alteration:'#')  }
+      \endif
    in
-      Music = 'export'(noteToEchantillon:NoteToEchantillon)
+      Music = 'export'(computeFrequency:ComputeFrequency noteToEchantillon:NoteToEchantillon transposeNote:Transpose)
    end
 
 
@@ -182,10 +282,10 @@ local Interprete Projet Testing Music Transformations in
       \ifdef Debug
       {Testing.assertEqual Etirer [[echantillon(hauteur:494 duree:1.0 instrument:none)] 2.0] [echantillon(hauteur:494 duree:2.0 instrument:none)] }
       {Testing.assertEqual Etirer [nil 2.0] nil }
-      {Testing.assertEqual Etirer [[echantillon(hauteur:494 duree:1.0 instrument:none) echantillon(hauteur:131 duree:1.0 instrument:none)] 2.0] [echantillon(hauteur:494 duree:2.0 instrument:none) echantillon(hauteur:131 duree:2.0 instrument:none)] }
-      {Testing.assertEqual Etirer [[echantillon(hauteur:494 duree:0.0 instrument:none)] 2.0] [echantillon(hauteur:494 duree:.0 instrument:none)] }
+      {Testing.assertEqual Etirer [[echantillon(hauteur:494 duree:1.0 instrument:none) echantillon(hauteur:131 duree:1.0 instrument:none)] 2.0]
+                                  [echantillon(hauteur:494 duree:2.0 instrument:none) echantillon(hauteur:131 duree:2.0 instrument:none)] }
+      {Testing.assertEqual Etirer [[echantillon(hauteur:494 duree:0.0 instrument:none)] 2.0] [echantillon(hauteur:494 duree:0.0 instrument:none)] }
       \endif
-
 
       % Fix the duration of a voice
       % Arg: a voice (flat list of echantillons) and the number of seconds the voice shoud last as float (>=0)
@@ -219,14 +319,19 @@ local Interprete Projet Testing Music Transformations in
 	 end
       end
       \ifdef Debug
-      {Testing.assertEqual Duree [[echantillon(hauteur:494 duree:1.0 instrument:none)] 2.5]                                                    [echantillon(hauteur:494 duree:2.5 instrument:none)] }
-      {Testing.assertEqual Duree [[echantillon(hauteur:494 duree:0.0 instrument:none)] 2.5]                                                    [echantillon(hauteur:494 duree:2.5 instrument:none)] }
-      {Testing.assertEqual Duree [[echantillon(hauteur:494 duree:0.0 instrument:none) echantillon(hauteur:494 duree:0.0 instrument:none)] 0.0] [echantillon(hauteur:494 duree:0.0 instrument:none) echantillon(hauteur:494 duree:0.0 instrument:none)] }
-      {Testing.assertEqual Duree [[echantillon(hauteur:494 duree:1.0 instrument:none) echantillon(hauteur:494 duree:1.0 instrument:none)] 3.0] [echantillon(hauteur:494 duree:1.5 instrument:none) echantillon(hauteur:494 duree:1.5 instrument:none)] }
-      {Testing.assertEqual Duree [[echantillon(hauteur:494 duree:1.0 instrument:none) echantillon(hauteur:494 duree:1.0 instrument:none)] 0.0] [echantillon(hauteur:494 duree:0.0 instrument:none) echantillon(hauteur:494 duree:0.0 instrument:none)] }
-      {Testing.assertEqual Duree [[echantillon(hauteur:494 duree:2.0 instrument:none) echantillon(hauteur:494 duree:4.0 instrument:none)] 3.0] [echantillon(hauteur:494 duree:1.0 instrument:none) echantillon(hauteur:494 duree:2.0 instrument:none)] }
+      {Testing.assertEqual Duree [[echantillon(hauteur:494 duree:1.0 instrument:none)] 2.5]
+                                  [echantillon(hauteur:494 duree:2.5 instrument:none)] }
+      {Testing.assertEqual Duree [[echantillon(hauteur:494 duree:0.0 instrument:none)] 2.5]
+                                  [echantillon(hauteur:494 duree:2.5 instrument:none)] }
+      {Testing.assertEqual Duree [[echantillon(hauteur:494 duree:0.0 instrument:none) echantillon(hauteur:494 duree:0.0 instrument:none)] 0.0]
+                                  [echantillon(hauteur:494 duree:0.0 instrument:none) echantillon(hauteur:494 duree:0.0 instrument:none)] }
+      {Testing.assertEqual Duree [[echantillon(hauteur:494 duree:1.0 instrument:none) echantillon(hauteur:494 duree:1.0 instrument:none)] 3.0]
+                                  [echantillon(hauteur:494 duree:1.5 instrument:none) echantillon(hauteur:494 duree:1.5 instrument:none)] }
+      {Testing.assertEqual Duree [[echantillon(hauteur:494 duree:1.0 instrument:none) echantillon(hauteur:494 duree:1.0 instrument:none)] 0.0]
+                                  [echantillon(hauteur:494 duree:0.0 instrument:none) echantillon(hauteur:494 duree:0.0 instrument:none)] }
+      {Testing.assertEqual Duree [[echantillon(hauteur:494 duree:2.0 instrument:none) echantillon(hauteur:494 duree:4.0 instrument:none)] 3.0]
+                                  [echantillon(hauteur:494 duree:1.0 instrument:none) echantillon(hauteur:494 duree:2.0 instrument:none)] }
       \endif
-
 
       % Mute a voice (flat list of echantillons) by setting hauteur to 0 for each echantillon
       % Arg: a voice
@@ -239,12 +344,53 @@ local Interprete Projet Testing Music Transformations in
 	 end
       end
       \ifdef Debug
-      {Testing.assertEqual Muet [[echantillon(hauteur:494 duree:1.0 instrument:none)]]                                                    [echantillon(hauteur:0 duree:1.0 instrument:none)] }
-      {Testing.assertEqual Muet [[echantillon(hauteur:0 duree:1.0 instrument:none)]]                                                      [echantillon(hauteur:0 duree:1.0 instrument:none)] }
-      {Testing.assertEqual Muet [[echantillon(hauteur:494 duree:1.0 instrument:none) echantillon(hauteur:494 duree:1.0 instrument:none)]] [echantillon(hauteur:0 duree:1.0 instrument:none) echantillon(hauteur:0 duree:1.0 instrument:none)] }      
+      {Testing.assertEqual Muet [[echantillon(hauteur:494 duree:1.0 instrument:none)]]
+                                 [echantillon(hauteur:0 duree:1.0 instrument:none)] }
+      {Testing.assertEqual Muet [[echantillon(hauteur:0 duree:1.0 instrument:none)]]
+                                 [echantillon(hauteur:0 duree:1.0 instrument:none)] }
+      {Testing.assertEqual Muet [[echantillon(hauteur:494 duree:1.0 instrument:none) echantillon(hauteur:494 duree:1.0 instrument:none)]]
+                                 [echantillon(hauteur:0 duree:1.0 instrument:none) echantillon(hauteur:0 duree:1.0 instrument:none)] }      
       \endif
+  
+      % Set all the enchantillons in a voice (flat list of echantillons) to a fixed frequency
+      % Arg: a voice and a frequency
+      % Return: a voice with all enchantillons set to the frequency passed as argument.
+      fun {Bourdon Voice Frequency}
+	 case Voice
+	 of nil then nil
+	 [] H|T then {Bourdon H Frequency} | {Bourdon T Frequency}
+	 [] echantillon(hauteur:_ duree:Duration instrument:Instrument) then echantillon(hauteur:Frequency duree:Duration instrument:Instrument)      
+	 end
+      end
+      \ifdef Debug
+      {Testing.assertEqual Bourdon [[echantillon(hauteur:494 duree:1.0 instrument:none)] 87]
+                                    [echantillon(hauteur:87 duree:1.0 instrument:none)] }
+      {Testing.assertEqual Bourdon [[echantillon(hauteur:494 duree:1.0 instrument:none) echantillon(hauteur:494 duree:1.0 instrument:none)] 10]
+                                    [echantillon(hauteur:10 duree:1.0 instrument:none) echantillon(hauteur:10 duree:1.0 instrument:none)] }      
+      {Testing.assertEqual Bourdon [[echantillon(hauteur:494 duree:1.0 instrument:none) echantillon(hauteur:494 duree:1.0 instrument:none)] 0]
+                                    [echantillon(hauteur:0 duree:1.0 instrument:none) echantillon(hauteur:0 duree:1.0 instrument:none)] }        
+      \endif
+
+      % Shift all the notes in a voice
+      % Arg: a partition
+      % Return: a transposed partition
+      fun {Transpose Partition HalfSteps}
+	  case Partition
+	  of nil then nil
+	  [] H|T then {Transpose H HalfSteps}|{Transpose T HalfSteps}
+	  [] etirer(facteur:_ Part)     then {Transpose Part HalfSteps}
+	  [] duree(secondes:_ Part)     then {Transpose Part HalfSteps}
+	  [] muet(Part)                 then {Transpose Part HalfSteps}
+	  [] bourdon(note:_ Part)       then {Transpose Part HalfSteps}
+	  [] transpose(demitons:_ Part) then {Transpose Part HalfSteps}
+	  [] Note then {Music.transposeNote {Music.extendNote Note} HalfSteps}
+	  end
+      end
+      % Notes in order are c c# d d# e f f# g g# a a# b
+      {Testing.assertEqual Transpose [[a3 b3 c3] 8]  [f g g#3] }
+      
    in
-      Transformations = 'export'(etirer:Etirer duree:Duree muet:Muet)
+      Transformations = 'export'(etirer:Etirer duree:Duree muet:Muet bourdon:Bourdon)
    end
   
    
@@ -265,29 +411,48 @@ local Interprete Projet Testing Music Transformations in
 	 Voice = case Partition
 		 of nil then nil
 		 [] H|T then {Interprete H}|{Interprete T}
-		 [] etirer(facteur:Factor Part)   then {Transformations.etirer {Interprete Part} Factor}
-		 [] duree(secondes:Duration Part) then {Transformations.duree  {Interprete Part} Duration}
-                 [] muet(Part)                    then {Transformations.muet   {Interprete Part}}
+		 [] etirer(facteur:Factor Part)    then {Transformations.etirer  {Interprete Part} Factor}
+		 [] duree(secondes:Duration Part)  then {Transformations.duree   {Interprete Part} Duration}
+		 [] muet(Part)                     then {Transformations.muet    {Interprete Part}}
+		 [] bourdon(note:Note Part)        then {Transformations.bourdon {Interprete Part} {Music.computeFrequency Note}}
+		 [] transpose(demitons:Shift Part) then {Interprete {Transformations.transpose Part Shift}}
 		 [] Note then [{Music.noteToEchantillon Note}]
 		 end
 	 {Flatten Voice}
       end
-
-      {Testing.assertEqual Interprete b                                                         [echantillon(hauteur:494 duree:1.0 instrument:none)] }
-      {Testing.assertEqual Interprete etirer(facteur:3.0 b)                                     [echantillon(hauteur:494 duree:3.0 instrument:none)] }
-      {Testing.assertEqual Interprete [ [[b] [c d#1]] ]                                         [echantillon(hauteur:494 duree:1.0 instrument:none) echantillon(hauteur:262 duree:1.0 instrument:none) echantillon(hauteur:39 duree:1.0 instrument:none)] }
-      {Testing.assertEqual Interprete [ [[b] etirer(facteur:2.0 [c3 d#1])] ]                    [echantillon(hauteur:494 duree:1.0 instrument:none) echantillon(hauteur:131 duree:2.0 instrument:none) echantillon(hauteur:39 duree:2.0 instrument:none)] }
-      {Testing.assertEqual Interprete [ [b etirer(facteur:2.0 [b etirer(facteur:2.0 b)])] ]     [echantillon(hauteur:494 duree:1.0 instrument:none) echantillon(hauteur:494 duree:2.0 instrument:none) echantillon(hauteur:494 duree:4.0 instrument:none)] }
-      {Testing.assertEqual Interprete duree(secondes:3.0 b)                                     [echantillon(hauteur:494 duree:3.0 instrument:none)] }
-      {Testing.assertEqual Interprete duree(secondes:3.0 [b c3])                                [echantillon(hauteur:494 duree:1.5 instrument:none) echantillon(hauteur:131 duree:1.5 instrument:none)] }
-      {Testing.assertEqual Interprete etirer(facteur:2.0 duree(secondes:3.0 b))                 [echantillon(hauteur:494 duree:6.0 instrument:none)] }
-      {Testing.assertEqual Interprete duree(secondes:2.0 duree(secondes:3.0 b))                 [echantillon(hauteur:494 duree:2.0 instrument:none)] }
-      {Testing.assertEqual Interprete [ [b duree(secondes:2.0 [b duree(secondes:3.0 [b b])])] ] [echantillon(hauteur:494 duree:1.0 instrument:none) echantillon(hauteur:494 duree:0.5 instrument:none) echantillon(hauteur:494 duree:0.75 instrument:none) echantillon(hauteur:494 duree:0.75 instrument:none)] }   
-      {Testing.assertEqual Interprete muet(b)                                                   [echantillon(hauteur:0 duree:1.0 instrument:none)] }
-      {Testing.assertEqual Interprete muet([b c3])                                              [echantillon(hauteur:0 duree:1.0 instrument:none) echantillon(hauteur:0 duree:1.0 instrument:none)] }
-      {Testing.assertEqual Interprete [ [b muet([b c3])] ]                                      [echantillon(hauteur:494 duree:1.0 instrument:none) echantillon(hauteur:0 duree:1.0 instrument:none) echantillon(hauteur:0 duree:1.0 instrument:none)] }
-      {Testing.assertEqual Interprete muet([b duree(secondes:2.0 c3)])                          [echantillon(hauteur:0 duree:1.0 instrument:none) echantillon(hauteur:0 duree:2.0 instrument:none)] }
-
+      \ifdef Debug
+      {Testing.assertEqual Interprete b [echantillon(hauteur:494 duree:1.0 instrument:none)] }
+      {Testing.assertEqual Interprete etirer(facteur:3.0 b) [echantillon(hauteur:494 duree:3.0 instrument:none)] }
+      {Testing.assertEqual Interprete [ [[b] [c d#1]] ]
+       [echantillon(hauteur:494 duree:1.0 instrument:none) echantillon(hauteur:262 duree:1.0 instrument:none) echantillon(hauteur:39 duree:1.0 instrument:none)] }
+      {Testing.assertEqual Interprete [ [[b] etirer(facteur:2.0 [c3 d#1])] ]
+       [echantillon(hauteur:494 duree:1.0 instrument:none) echantillon(hauteur:131 duree:2.0 instrument:none) echantillon(hauteur:39 duree:2.0 instrument:none)] }
+      {Testing.assertEqual Interprete [ [b etirer(facteur:2.0 [b etirer(facteur:2.0 b)])] ]
+       [echantillon(hauteur:494 duree:1.0 instrument:none) echantillon(hauteur:494 duree:2.0 instrument:none) echantillon(hauteur:494 duree:4.0 instrument:none)] }
+      {Testing.assertEqual Interprete duree(secondes:3.0 b)
+       [echantillon(hauteur:494 duree:3.0 instrument:none)] }
+      {Testing.assertEqual Interprete duree(secondes:3.0 [b c3])
+       [echantillon(hauteur:494 duree:1.5 instrument:none) echantillon(hauteur:131 duree:1.5 instrument:none)] }
+      {Testing.assertEqual Interprete etirer(facteur:2.0 duree(secondes:3.0 b))
+       [echantillon(hauteur:494 duree:6.0 instrument:none)] }
+      {Testing.assertEqual Interprete duree(secondes:2.0 duree(secondes:3.0 b))
+       [echantillon(hauteur:494 duree:2.0 instrument:none)] }
+      {Testing.assertEqual Interprete [ [b duree(secondes:2.0 [b duree(secondes:3.0 [b b])])] ]
+       [echantillon(hauteur:494 duree:1.0 instrument:none) echantillon(hauteur:494 duree:0.5 instrument:none)
+	echantillon(hauteur:494 duree:0.75 instrument:none) echantillon(hauteur:494 duree:0.75 instrument:none)] }   
+      {Testing.assertEqual Interprete muet(b) [echantillon(hauteur:0 duree:1.0 instrument:none)] }
+      {Testing.assertEqual Interprete muet([b c3])
+       [echantillon(hauteur:0 duree:1.0 instrument:none) echantillon(hauteur:0 duree:1.0 instrument:none)] }
+      {Testing.assertEqual Interprete [ [b muet([b c3])] ]
+       [echantillon(hauteur:494 duree:1.0 instrument:none) echantillon(hauteur:0 duree:1.0 instrument:none) echantillon(hauteur:0 duree:1.0 instrument:none)] }
+      {Testing.assertEqual Interprete muet([b duree(secondes:2.0 c3)])
+       [echantillon(hauteur:0 duree:1.0 instrument:none) echantillon(hauteur:0 duree:2.0 instrument:none)] }
+      {Testing.assertEqual Interprete bourdon(note:silence c) {Interprete muet(c)} }
+      {Testing.assertEqual Interprete bourdon(note:c2 [b c2])
+       [echantillon(hauteur:65 duree:1.0 instrument:none) echantillon(hauteur:65 duree:1.0 instrument:none)] }
+      {Testing.assertEqual Interprete [ [c3 bourdon(note:c2 etirer(facteur:2.0 [b c2]))] ]
+       [echantillon(hauteur:131 duree:1.0 instrument:none) echantillon(hauteur:65 duree:2.0 instrument:none) echantillon(hauteur:65 duree:2.0 instrument:none)] }
+      \endif
    % end
 
    % local 
