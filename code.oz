@@ -105,6 +105,7 @@ local Interprete Projet Testing Music Transformations Lib in
 	 case ExtendedNote
 	 of note(nom:silence octave:_ alteration:_)     then silence
 	 [] note(nom:Note octave:Octave alteration:'#') then Note#Octave
+	 [] note(nom:Note octave:4      alteration:_)   then Note
 	 [] note(nom:Note octave:Octave alteration:_)   then {StringToAtom {Append {AtomToString Note} {IntToString Octave}}}
 	 else raise cannotContractNote(ExtendedNote) end
 	 end
@@ -112,7 +113,8 @@ local Interprete Projet Testing Music Transformations Lib in
       \ifdef Debug
       {Testing.assertEqual ContractNote note(nom:a octave:0 alteration:none)  a0}
       {Testing.assertEqual ContractNote note(nom:c octave:2 alteration:'#')  c#2}
-      {Testing.assertEqual ContractNote note(nom:c octave:4 alteration:none)  c4}
+      {Testing.assertEqual ContractNote note(nom:c octave:4 alteration:none)   c}
+      {Testing.assertEqual ContractNote note(nom:c octave:3 alteration:none)  c3}
       {Testing.assertEqual ContractNote note(nom:silence octave:4 alteration:none) silence}
       \endif
       
@@ -238,24 +240,31 @@ local Interprete Projet Testing Music Transformations Lib in
       % Arg: note in short notation and number of halfSteps to transpose (>= -11 and <= 11)
       % Return: transposed note in extended notation.
       fun {Transpose OriginalNote HalfSteps}	 
-	 OctaveSteps  = HalfSteps div NotesListLength
-	 NoteSteps    = HalfSteps mod NotesListLength
-	 ExtendedNote = {ExtendNote OriginalNote}
+	 OctaveSteps NoteSteps ExtendedNote TransposedNote
       in
-	 if HalfSteps == 0       then OriginalNote
-	 elseif OctaveSteps == 0 then {TransposeNote OriginalNote NoteSteps}
-	 elseif NoteSteps == 0   then {Browse ici} {TransposeOctave OriginalNote OctaveSteps}
-	 else {TransposeNote {TransposeOctave OriginalNote OctaveSteps} NoteSteps}
-	 end 
+	 if (OriginalNote == silence) then silence
+	 elseif (HalfSteps == 0)      then OriginalNote
+	 else
+	    OctaveSteps  = HalfSteps div NotesListLength
+	    NoteSteps    = HalfSteps mod NotesListLength
+	    ExtendedNote = {ExtendNote OriginalNote}
+	    TransposedNote = if     OctaveSteps == 0 then {TransposeNote ExtendedNote NoteSteps}
+			     elseif   NoteSteps == 0 then {TransposeOctave ExtendedNote OctaveSteps}
+			     else {TransposeNote {TransposeOctave ExtendedNote OctaveSteps} NoteSteps}
+			     end
+	    {ContractNote TransposedNote}		     
+	 end
       end
       \ifdef Debug
-      {Testing.assertEqual Transpose [note(nom:a octave:3 alteration:none)  12]  note(nom:a octave:4 alteration:none) }
-      {Testing.assertEqual Transpose [note(nom:a octave:3 alteration:none) ~12]  note(nom:a octave:2 alteration:none) }
-      {Testing.assertEqual Transpose [note(nom:a octave:3 alteration:none)   1]  note(nom:a octave:3 alteration:'#')  }
-      {Testing.assertEqual Transpose [note(nom:a octave:3 alteration:none)   2]  note(nom:b octave:3 alteration:none) }
-      {Testing.assertEqual Transpose [note(nom:a octave:3 alteration:none)   3]  note(nom:c octave:4 alteration:none) }
-      {Testing.assertEqual Transpose [note(nom:g octave:2 alteration:'#')   ~5]  note(nom:d octave:2 alteration:'#')  }
-      {Testing.assertEqual Transpose [note(nom:g octave:4 alteration:'#')  ~26]  note(nom:f octave:2 alteration:'#')  }
+      {Testing.assertEqual Transpose [a3   12]  a   }
+      {Testing.assertEqual Transpose [a3  ~12]  a2  }
+      {Testing.assertEqual Transpose [a3    1]  a#3 }
+      {Testing.assertEqual Transpose [a3    2]  b3  }
+      {Testing.assertEqual Transpose [a3    3]  c   }
+      {Testing.assertEqual Transpose [g#3  ~5]  d#3 }
+      {Testing.assertEqual Transpose [g#4 ~26]  f#2 }
+      {Testing.assertEqual Transpose [silence ~26]  silence }
+      {Testing.assertEqual Transpose [g#4   0]  g#4 }
       \endif
    in
       Music = 'export'(computeFrequency:ComputeFrequency noteToEchantillon:NoteToEchantillon transposeNote:Transpose)
@@ -376,19 +385,25 @@ local Interprete Projet Testing Music Transformations Lib in
       % Return: a transposed partition
       fun {Transpose Partition HalfSteps}
 	  case Partition
-	  of nil then nil
-	  [] H|T then {Transpose H HalfSteps}|{Transpose T HalfSteps}
-	  [] etirer(facteur:_ Part)     then {Transpose Part HalfSteps}
-	  [] duree(secondes:_ Part)     then {Transpose Part HalfSteps}
-	  [] muet(Part)                 then {Transpose Part HalfSteps}
-	  [] bourdon(note:_ Part)       then {Transpose Part HalfSteps}
-	  [] transpose(demitons:_ Part) then {Transpose Part HalfSteps}
-	  [] Note then {Music.transposeNote {Music.extendNote Note} HalfSteps}
+	  of nil                        then nil
+	  [] H|T                        then {Transpose H HalfSteps}|{Transpose T HalfSteps}
+	  [] etirer(facteur:F Part)     then etirer(facteur:F {Transpose Part HalfSteps})
+	  [] duree(secondes:S Part)     then duree(secondes:S {Transpose Part HalfSteps})
+	  [] muet(Part)                 then muet({Transpose Part HalfSteps})
+	  [] bourdon(note:N Part)       then bourdon(note:N {Transpose Part HalfSteps})
+	  [] transpose(demitons:D Part) then transpose(demitons:D {Transpose Part HalfSteps})
+	  [] Note                       then {Music.transposeNote Note HalfSteps}
 	  end
       end
       % Notes in order are c c# d d# e f f# g g# a a# b
-      {Testing.assertEqual Transpose [[a3 b3 c3] 8]  [f g g#3] }
-      
+      {Testing.assertEqual Transpose [[a3 b3 c3] 8]                         [f g g#3] }
+      {Testing.assertEqual Transpose [[[a3 b3] c3] 8]                       [[f g] g#3] }
+      {Testing.assertEqual Transpose [[[a3 b3] c3] 0]                       [[a3 b3] c3] }
+      {Testing.assertEqual Transpose [[silence b3 c3] 8]                    [silence g g#3] }
+      {Testing.assertEqual Transpose [b3 8]                                 g }
+      {Testing.assertEqual Transpose [[a3 b3 c3] ~2]                        [g3 a3 a#2] }
+      {Testing.assertEqual Transpose [[a3 muet(b3) c3] ~2]                  [g3 muet(a3) a#2] }
+      {Testing.assertEqual Transpose [[a3 transpose(demitons:3 b3) c3] ~2]  [g3 transpose(demitons:3 a3) a#2] }
    in
       Transformations = 'export'(etirer:Etirer duree:Duree muet:Muet bourdon:Bourdon)
    end
