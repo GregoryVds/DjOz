@@ -1,4 +1,4 @@
-\define DebugVoix
+% \define DebugVoix
 
 % Transformation functions that act on a voice (flat list of echantillons)
 % - Etirer
