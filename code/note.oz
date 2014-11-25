@@ -1,4 +1,4 @@
-\define DebugNote
+% \define DebugNote
 local
    % Convert a note from short notation to extended notation
    % Arg: note in short notation (a, b3, b#4, silence)
