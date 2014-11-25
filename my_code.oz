@@ -15,11 +15,12 @@ local Interprete Projet Testing NoteMod VoixMod in
    %
    % et une constante :
    % Projet.hz = 44100, la fréquence d'échantilonnage (nombre de données par seconde)
+  
    
-   Testing     = \insert /Users/Greg/Desktop/Projet2014/code/test.oz
    NoteMod     = \insert /Users/Greg/Desktop/Projet2014/code/note.oz
    VoixMod     = \insert /Users/Greg/Desktop/Projet2014/code/voix.oz
-  
+   Testing     = \insert /Users/Greg/Desktop/Projet2014/code/test.oz
+   
    local
       VoiceToMusic
       HauteurToFrequency

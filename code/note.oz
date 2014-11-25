@@ -1,5 +1,9 @@
 % \define DebugNote
 local
+   \ifdef DebugNote
+   Testing = \insert /Users/Greg/Desktop/Projet2014/code/test.oz
+   \endif
+   
    % Convert a note from short notation to extended notation
    % Arg: note in short notation (a, b3, b#4, silence)
    % Returns: a note in extended form like note(name:a octave:3 alteration:none)
@@ -96,6 +100,10 @@ local
    {Testing.assertEqual ToEchantillon silence  silence(duree:1.0)}
    \endif
 in
+   \ifdef DebugNote
+   {Browse 'export'(toEchantillon:ToEchantillon hauteur:Hauteur)}
+   \else
    'export'(toEchantillon:ToEchantillon hauteur:Hauteur)
+   \endif   
 end
 \undef DebugNote

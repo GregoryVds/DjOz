@@ -1,11 +1,14 @@
 % \define DebugVoix
-
 % Transformation functions that act on a voice (flat list of echantillons)
 % - Etirer
 % - Duree
 % - Muet
 
 local
+   \ifdef DebugVoix
+   Testing = \insert /Users/Greg/Desktop/Projet2014/code/test.oz
+   \endif
+   
    % Stretch a voice.
    % Arg: a voice (flat list of echantillons) and a strech factor as float
    % Return: a strechted voice
@@ -149,7 +152,7 @@ local
    fun {Transpose Voice HalfSteps}
       fun {TransposeEchantillon Echantillon}
 	 case Echantillon
-	 of silence(duree:Duree) then Echantillon %TODO: Verify transpose of silence
+	 of silence(duree:_) then Echantillon %TODO: Verify transpose of silence
 	 [] echantillon(hauteur:Hauteur duree:Duree instrument:Instrument) then echantillon(hauteur:(Hauteur+HalfSteps) duree:Duree instrument:Instrument)
 	 end
       end
@@ -169,6 +172,10 @@ local
                                    [echantillon(hauteur:6  duree:1.0 instrument:none) silence(duree:1.0)] }
     \endif
 in
+   \ifdef DebugVoix
+   {Browse 'export'(etirer:Etirer duree:Duree muet:Muet bourdon:Bourdon transpose:Transpose)}
+   \else
    'export'(etirer:Etirer duree:Duree muet:Muet bourdon:Bourdon transpose:Transpose)
+   \endif   
 end
 \undef DebugVoix
