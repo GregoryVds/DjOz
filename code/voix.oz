@@ -4,11 +4,10 @@
 % - Duree
 % - Muet
 
+\ifndef TestVoix
 local
-   \ifdef DebugVoix
-   Testing = \insert /Users/Greg/Desktop/Projet2014/code/test.oz
-   \endif
-   
+\endif
+  
    % Stretch a voice.
    % Arg: a voice (flat list of echantillons) and a strech factor as float
    % Return: a strechted voice
@@ -22,17 +21,7 @@ local
    in
       {Map Voice EtirerEchantillon}
    end
-   \ifdef DebugVoix
-   {Testing.assertEqual Etirer [[echantillon(hauteur:0 duree:1.0 instrument:none)] 2.0] [echantillon(hauteur:0 duree:2.0 instrument:none)] }
-   {Testing.assertEqual Etirer [[echantillon(hauteur:0 duree:1.0 instrument:none)] 0.5] [echantillon(hauteur:0 duree:0.5 instrument:none)] }
-   {Testing.assertEqual Etirer [nil 2.0] nil }
-   {Testing.assertEqual Etirer [[echantillon(hauteur:0 duree:1.0 instrument:none) echantillon(hauteur:0 duree:1.0 instrument:none)] 2.0]
-                                [echantillon(hauteur:0 duree:2.0 instrument:none) echantillon(hauteur:0 duree:2.0 instrument:none)] }
-   {Testing.assertEqual Etirer [[echantillon(hauteur:0 duree:0.0 instrument:none)] 2.0] [echantillon(hauteur:0 duree:0.0 instrument:none)] }
-   {Testing.assertEqual Etirer [[echantillon(hauteur:0 duree:2.0 instrument:none) silence(duree:2.0)] 0.5]
-                                [echantillon(hauteur:0 duree:1.0 instrument:none) silence(duree:1.0)] }
-   \endif
-
+   
 
    % Compute the total duration of a voice
    % Arg: a voice
@@ -43,10 +32,6 @@ local
       [] H|T then H.duree + {TotalDuration T}
       end  
    end
-   \ifdef DebugVoix
-   {Testing.assertEqual TotalDuration [[echantillon(hauteur:0 duree:1.0 instrument:none)]] 1.0}
-   {Testing.assertEqual TotalDuration [[echantillon(hauteur:0 duree:2.0 instrument:none) echantillon(hauteur:0 duree:2.0 instrument:none)]] 4.0}
-   \endif
 
    
    % Fix the duration of each echantillon in a voice to a fixed duration
@@ -62,11 +47,6 @@ local
    in
       {Map Voice DureeEchantillon}
    end
-   \ifdef DebugVoix
-   {Testing.assertEqual SetFixedDureeForEachEchantillon [[echantillon(hauteur:0 duree:2.0 instrument:none)] 3.0] [echantillon(hauteur:0 duree:3.0 instrument:none)]}
-   {Testing.assertEqual SetFixedDureeForEachEchantillon [[echantillon(hauteur:0 duree:1.0 instrument:none) echantillon(hauteur:0 duree:3.0 instrument:none)] 2.0]
-                                                         [echantillon(hauteur:0 duree:2.0 instrument:none) echantillon(hauteur:0 duree:2.0 instrument:none)] }
-   \endif
         
       
    % Fix the total duration of a voice while preserving the relative duration of each echantillon
@@ -81,21 +61,8 @@ local
 	 end
       end
    end
-   \ifdef DebugVoix
-   {Testing.assertEqual Duree [nil 3.0] nil }
-   {Testing.assertEqual Duree [[echantillon(hauteur:0 duree:1.0 instrument:none)] 2.5]
-                               [echantillon(hauteur:0 duree:2.5 instrument:none)] }
-   {Testing.assertEqual Duree [[echantillon(hauteur:0 duree:0.0 instrument:none)] 2.5]
-                               [echantillon(hauteur:0 duree:2.5 instrument:none)] }
-   {Testing.assertEqual Duree [[echantillon(hauteur:0 duree:0.0 instrument:none) echantillon(hauteur:0 duree:0.0 instrument:none)] 1.0]
-                               [echantillon(hauteur:0 duree:0.5 instrument:none) echantillon(hauteur:0 duree:0.5 instrument:none)] }
-   {Testing.assertEqual Duree [[echantillon(hauteur:0 duree:2.0 instrument:none) echantillon(hauteur:0 duree:4.0 instrument:none)] 3.0]
-                               [echantillon(hauteur:0 duree:1.0 instrument:none) echantillon(hauteur:0 duree:2.0 instrument:none)] }
-   {Testing.assertEqual Duree [[echantillon(hauteur:0 duree:2.0 instrument:none) silence(duree:4.0)] 3.0]
-                               [echantillon(hauteur:0 duree:1.0 instrument:none) silence(duree:2.0)] }
-   \endif
 
-   
+
    % Mute a voice by setting hauteur to 0 for each echantillon
    % Arg: a voice (flat list of echantillons)
    % Return: a muted voice (hauteur = 0)
@@ -109,12 +76,6 @@ local
    in
       {Map Voice MuetEchantillon}
    end
-   \ifdef DebugVoix
-   {Testing.assertEqual Muet [[echantillon(hauteur:0 duree:1.0 instrument:none)]] [silence(duree:1.0)] }
-   {Testing.assertEqual Muet [[echantillon(hauteur:~10 duree:2.0 instrument:none) echantillon(hauteur:10 duree:1.0 instrument:none)]]
-                              [silence(duree:2.0) silence(duree:1.0)] }      
-   {Testing.assertEqual Muet [[echantillon(hauteur:10 duree:1.0 instrument:none) silence(duree:1.0)]] [silence(duree:1.0) silence(duree:1.0)] }
-   \endif
 
    
    % Set the hauteur of each enchantillons in a voice to a fixed value
@@ -132,18 +93,6 @@ local
    in
       {Map Voice BourdonEchantillon}
    end  
-   \ifdef DebugVoix
-   {Testing.assertEqual Bourdon [nil 5] nil }
-   {Testing.assertEqual Bourdon [[echantillon(hauteur:10 duree:1.0 instrument:none)] silence] [silence(duree:1.0)]}
-   {Testing.assertEqual Bourdon [[echantillon(hauteur:10 duree:1.0 instrument:none)] 5]
-                                 [echantillon(hauteur:5  duree:1.0 instrument:none)] }
-   {Testing.assertEqual Bourdon [[echantillon(hauteur:0 duree:1.0 instrument:none)  echantillon(hauteur:20 duree:1.0 instrument:none)] 10]
-                                 [echantillon(hauteur:10 duree:1.0 instrument:none) echantillon(hauteur:10 duree:1.0 instrument:none)] }      
-   {Testing.assertEqual Bourdon [[echantillon(hauteur:10 duree:1.0 instrument:none) echantillon(hauteur:10 duree:2.0 instrument:none)] silence]
-                                 [silence(duree:1.0) silence(duree:2.0)] }        
-   {Testing.assertEqual Bourdon [[echantillon(hauteur:0  duree:1.0 instrument:none) silence(duree:1.0)] 10]
-                                 [echantillon(hauteur:10 duree:1.0 instrument:none) echantillon(hauteur:10 duree:1.0 instrument:none)] }      
-   \endif
 
    
    % Shift the hauteur of all echantillons in a voice by a number of halfsteps
@@ -159,23 +108,47 @@ local
    in
       {Map Voice TransposeEchantillon}
    end
-   \ifdef DebugVoix
-   {Testing.assertEqual Transpose [nil 8] nil }
-   {Testing.assertEqual Transpose [[echantillon(hauteur:10 duree:1.0 instrument:none)]~12] [echantillon(hauteur:~2 duree:1.0 instrument:none)] }
-   {Testing.assertEqual Transpose [[echantillon(hauteur:10 duree:1.0 instrument:none)]  8] [echantillon(hauteur:18 duree:1.0 instrument:none)] }
-   {Testing.assertEqual Transpose [[echantillon(hauteur:~2 duree:1.0 instrument:none)]  8] [echantillon(hauteur:6  duree:1.0 instrument:none)] }
-   {Testing.assertEqual Transpose [[echantillon(hauteur:10 duree:1.0 instrument:none)] ~8] [echantillon(hauteur:2  duree:1.0 instrument:none)] }
-   {Testing.assertEqual Transpose [[echantillon(hauteur:10 duree:1.0 instrument:none)]  0] [echantillon(hauteur:10 duree:1.0 instrument:none)] }
-   {Testing.assertEqual Transpose [[echantillon(hauteur:1  duree:1.0 instrument:none) echantillon(hauteur:10 duree:1.0 instrument:none)]  5]
-                                   [echantillon(hauteur:6  duree:1.0 instrument:none) echantillon(hauteur:15 duree:1.0 instrument:none)] }
-   {Testing.assertEqual Transpose [[echantillon(hauteur:1  duree:1.0 instrument:none) silence(duree:1.0)]  5]
-                                   [echantillon(hauteur:6  duree:1.0 instrument:none) silence(duree:1.0)] }
-    \endif
+
+
+   % Convert an hauteur to a frequency
+   % Arg: Hauteur as integer (+ or -)
+   % Return: A frequency as float >= 0
+   fun {HauteurToFrequency Hauteur}
+      {Pow 2.0 ({IntToFloat Hauteur}/12.0)} * 440.0
+   end
+
+   
+   % Build an audio vector for a frequency and a duree
+   % Arg: Frequency as float (>= 0) and duree as float (>= 0)
+   % Return: An audio vector (list of floats between -1 and 1) of size Duree*Projet.hz 
+   fun {BuildAudioVector Frequency Duree SamplingRate}
+      Pi   = 3.14159265358979323846 %TODO: How to get Pi in a clever way?
+      Temp = (2.0*Pi*Frequency)/{IntToFloat SamplingRate}
+      ValuesCount = {FloatToInt Duree*{IntToFloat SamplingRate}}
+      fun {AudioVector I}
+	 if I>ValuesCount then nil else (0.5 * {Sin (Temp*{IntToFloat I})}) | {AudioVector I+1} end
+      end
+   in
+      {AudioVector 1}
+   end
+
+   
+   % Converts a voice (flat list of echantillons) to an audio vector
+   % Arg: A voice
+   % Return: An audio vector (list of floats between -1 and 1) 
+   fun {VoiceToAudioVector Voice SamplingRate}
+      fun {EchantillonToAudioVector Echantillon}
+	 case Echantillon
+	 of silence(duree:Duree) then {BuildAudioVector 0.0 Duree SamplingRate}
+	 [] echantillon(hauteur:Hauteur duree:Duree instrument:_) then {BuildAudioVector {HauteurToFrequency Hauteur} Duree SamplingRate} %TODO: Use instrument
+	 end
+      end
+   in
+      {Flatten {Map Voice EchantillonToAudioVector}} %TODO: Optimize by removing Flatten?
+   end
+
+\ifndef TestVoix
 in
-   \ifdef DebugVoix
-   {Browse 'export'(etirer:Etirer duree:Duree muet:Muet bourdon:Bourdon transpose:Transpose)}
-   \else
-   'export'(etirer:Etirer duree:Duree muet:Muet bourdon:Bourdon transpose:Transpose)
-   \endif   
+   'export'(etirer:Etirer duree:Duree muet:Muet bourdon:Bourdon transpose:Transpose voiceToAudioVector:VoiceToAudioVector)
 end
-\undef DebugVoix
+\endif

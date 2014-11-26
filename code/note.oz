@@ -1,8 +1,6 @@
-% \define DebugNote
+\ifndef TestNote
 local
-   \ifdef DebugNote
-   Testing = \insert /Users/Greg/Desktop/Projet2014/code/test.oz
-   \endif
+\endif
    
    % Convert a note from short notation to extended notation
    % Arg: note in short notation (a, b3, b#4, silence)
@@ -18,14 +16,6 @@ local
 	 end
       end
    end
-   \ifdef DebugNote
-   {Testing.assertEqual ExtendNote a3      note(nom:a octave:3 alteration:none)}
-   {Testing.assertEqual ExtendNote c#2     note(nom:c octave:2 alteration:'#')}
-   {Testing.assertEqual ExtendNote b3      note(nom:b octave:3 alteration:none)}
-   {Testing.assertEqual ExtendNote d3      note(nom:d octave:3 alteration:none)}
-   {Testing.assertEqual ExtendNote c       note(nom:c octave:4 alteration:none)}
-   {Testing.assertEqual ExtendNote silence note(nom:silence octave:4 alteration:none)}
-   \endif
 
    
    % Compute the distance of the extended note from A
@@ -50,12 +40,6 @@ local
       else raise wrongArgument(function:DistanceFromA arg:ExtendedNote) end
       end     
    end
-   \ifdef DebugNote
-   {Testing.assertEqual DistanceFromA note(nom:a octave:3 alteration:none) 0}
-   {Testing.assertEqual DistanceFromA note(nom:c octave:2 alteration:'#')  ~8}
-   {Testing.assertEqual DistanceFromA note(nom:b octave:3 alteration:none) 2}
-   {Testing.assertEqual DistanceFromA note(nom:d octave:3 alteration:none) ~7}
-   \endif
    
    
    % Count the number of half-steps of a note from note a4
@@ -73,15 +57,6 @@ local
 	 OctaveDistance+NoteDistance
       end
    end
-   \ifdef DebugNote
-   {Testing.assertEqual Hauteur a     0}
-   {Testing.assertEqual Hauteur e    ~5}
-   {Testing.assertEqual Hauteur b     2}
-   {Testing.assertEqual Hauteur b3  ~10}
-   {Testing.assertEqual Hauteur d#1 ~42}
-   {Testing.assertEqual Hauteur a#4   1}
-   {Testing.assertEqual Hauteur silence silence}
-   \endif
 
    
    % Convert a note to an echantillon
@@ -93,17 +68,9 @@ local
       [] _       then echantillon(hauteur:{Hauteur Note} duree:1.0 instrument:none)
       end
    end
-   \ifdef DebugNote
-   {Testing.assertEqual ToEchantillon d#2      echantillon(hauteur:~30  duree:1.0 instrument:none)}
-   {Testing.assertEqual ToEchantillon a        echantillon(hauteur:0    duree:1.0 instrument:none)}
-   {Testing.assertEqual ToEchantillon d2       echantillon(hauteur:~31  duree:1.0 instrument:none)}
-   {Testing.assertEqual ToEchantillon silence  silence(duree:1.0)}
-   \endif
+
+\ifndef TestNote
 in
-   \ifdef DebugNote
-   {Browse 'export'(toEchantillon:ToEchantillon hauteur:Hauteur)}
-   \else
    'export'(toEchantillon:ToEchantillon hauteur:Hauteur)
-   \endif   
 end
-\undef DebugNote
+\endif
