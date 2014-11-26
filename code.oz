@@ -16,12 +16,11 @@ local
    Mix
 
    HauteurToFrequency
-   VoiceToMusic
+   VoiceToAudioVector
+   BuildAudioVector
 in   
-
-   % Audio = {Projet.readFile CWD#'wave/animaux/cow.wav'}
-   
-   
+   % {Browse {Projet.readFile CWD#'wave/animaux/cow.wav'}}
+  
    fun {Interprete Partition}
       Voice
    in
@@ -38,39 +37,80 @@ in
       {Flatten Voice}
    end
 
+   
+   % Convert an hauteur to a frequency
+   % Arg: Hauteur as integer (+ or -)
+   % Return: A frequency as float >= 0
    fun {HauteurToFrequency Hauteur}
       {Pow 2.0 ({IntToFloat Hauteur}/12.0)} * 440.0
    end
+   \ifdef Debug
    {Testing.assertEqual HauteurToFrequency 0  440.0}
    {Testing.assertEqual HauteurToFrequency 10 783.99}
    {Testing.assertEqual HauteurToFrequency ~2 392.0}
+   \endif
 
-	
-   fun {VoiceToMusic Voice}
-      fun {EchantillonToMusic Echantillon}
+   
+   % Build an audio vector for a frequency and a duree
+   % Arg: Frequency as float (>= 0) and duree as float (>= 0)
+   % Return: An audio vector (list of floats between -1 and 1) of size Duree*Projet.hz 
+   fun {BuildAudioVector Frequency Duree}
+      Pi   = 3.14159265358979323846 %TODO: How to get Pi in a clever way?
+      Temp = (2.0*Pi*Frequency)/{IntToFloat Projet.hz}
+      ValuesCount = {FloatToInt Duree*{IntToFloat Projet.hz}}
+      fun {AudioVector I}
+	 if I>ValuesCount then nil else (0.5 * {Sin (Temp*{IntToFloat I})}) | {AudioVector I+1} end
+      end
+   in
+      {AudioVector 1}
+   end
+   \ifdef Debug
+   local Vector1 Vector2 Vector3 in
+      Vector1 = {BuildAudioVector 440.0 0.001}
+      {Testing.assertEqual Length [Vector1] 44}
+      {Testing.assertEqual Nth [Vector1 10] 0.293316}
+      {Testing.assertEqual Nth [Vector1 35] 0.405969}
+      Vector2 = {BuildAudioVector 783.99 0.005}
+      {Testing.assertEqual Length [Vector2] 220}
+      {Testing.assertEqual Nth [Vector2 10] 0.449393}
+   end
+   \endif
+
+   
+   % Converts a voice (flat list of echantillons) to an audio vector
+   % Arg: A voice
+   % Return: An audio vector (list of floats between -1 and 1) 
+   fun {VoiceToAudioVector Voice}
+      fun {EchantillonToAudioVector Echantillon}
 	 case Echantillon
-	 of silence(duree: Duree) then temp
-	 [] echantillon(hauteur:Hauteur duree:Duree instrument:Instrument) then temp
+	 of silence(duree:Duree) then {BuildAudioVector 0.0 Duree}
+	 [] echantillon(hauteur:Hauteur duree:Duree instrument:_) then {BuildAudioVector {HauteurToFrequency Hauteur} Duree} %TODO: Use instrument
 	 end
       end
    in
-      {Map Voice EchantillonToMusic}
+      {Flatten {Map Voice EchantillonToAudioVector}} %TODO: Optimize by removing Flatten?
    end
-	 	 
+   \ifdef Debug
+   local Vector1 in
+      Vector1 = {VoiceToAudioVector [echantillon(hauteur:10 duree:0.00025 instrument:none) echantillon(hauteur:~2 duree:0.0005 instrument:none)]}
+      {Testing.assertEqual Length [Vector1] 33}
+      {Testing.assertEqual Nth [Vector1 10] 0.449393}
+      {Testing.assertEqual Nth [Vector1 20] 0.240876}
+   end  
+  \endif
    
    fun {Mix Interprete Music}
       case Music
       of nil then nil
       [] H|T then {Mix Interprete H} | {Mix Interprete T}
-      [] voix(Voix)      then {VoiceToMusic Voix}
+      [] voix(Voix)      then {VoiceToAudioVector Voix}
       [] partition(Part) then {Mix Interprete voix({Interprete Part})}
+      [] wave(FileName)  then {Projet.readFile FileName}
       end 
-	 % [] wave(FileName)  then
-	 % [] merge(Musics)   then
+      % [] merge(Musics)   then...
+      % [] filter          then...
    end
 
-
-      
      \ifdef Debug
       % Basic partitions
       {Testing.assertEqual Interprete nil nil}      
