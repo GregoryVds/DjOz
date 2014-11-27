@@ -11,6 +11,7 @@ local
    Testing  = \insert /Users/Greg/Desktop/Projet2014/lib/test.oz
    NoteMod  = \insert /Users/Greg/Desktop/Projet2014/code/note.oz
    VoixMod  = \insert /Users/Greg/Desktop/Projet2014/code/voix.oz
+   Vector   = \insert /Users/Greg/Desktop/Projet2014/code/vector.oz
    Interprete
    Mix
 in
@@ -32,19 +33,53 @@ in
       {Flatten Voice}
    end
 
-   
+
+
+  
    fun {Mix Interprete Music}
-      case Music
+      fun {ExtractVectorsToMerge MusicsWithIntensity}
+	 {Browse calledWith(MusicsWithIntensity)}
+	 case MusicsWithIntensity
+	 of nil then nil
+	 [] H|T then {ExtractVectorsToMerge H} | {ExtractVectorsToMerge T}
+	 [] Float#Music then Float#{Mix Interprete Music}
+	 end      
+      end
+      AudioVector
+   in
+      AudioVector = case Music
       of nil then nil
       [] H|T then {Mix Interprete H} | {Mix Interprete T}
-      [] voix(Voix)      then {VoixMod.voiceToAudioVector Voix Projet.hz}
-      [] partition(Part) then {Mix Interprete voix({Interprete Part})}
-      [] wave(FileName)  then {Projet.readFile FileName}
-      end 
-      % [] merge(Musics)   then...
+      [] partition(Part)       then {Mix Interprete voix({Interprete Part}) }    % TODO: Optimize this and flatten?
+      [] voix(Voix)            then {VoixMod.voiceToAudioVector Voix Projet.hz}	       
+      [] wave(FileName)        then {Projet.readFile FileName}
+      [] merge(ZiksToMerge)    then {Vector.merge {ExtractVectorsToMerge ZiksToMerge}}
+      [] renverser(Zik)        then {Reverse {Mix Interprete Zik}}
+      [] repetition(nombre:Factor Zik) then {Vector.repeat {Mix Interprete Zik} Factor}
+      [] clip(bas:Low haut:High Zik)   then {Vector.clip {Mix Interprete Zik} Low High}		      
+      end
+      {Flatten AudioVector}
+      % 
       % [] filter          then...
    end
 
+   % {Browse {Mix Interprete merge([0.4#partition([a b2 [c3]]) 0.6#voix([echantillon(hauteur:2 duree:0.5 instrument:none)])])}}
+   
+   
+   
+   local V1 V2 V3 in
+      V1 = {Mix Interprete [partition([a b2 [c3]])] }
+      {Testing.assertEqual IsList [V1] true}
+      {Testing.assertEqual Length [V1] 132300}
+      
+      V2 = {Mix Interprete [voix([echantillon(hauteur:2 duree:0.5 instrument:none) echantillon(hauteur:~10 duree:0.5 instrument:none)])] }
+      {Testing.assertEqual IsList [V2] true}
+      {Testing.assertEqual Length [V2] 44100}
+            
+      V3 = {Mix Interprete [voix([echantillon(hauteur:0 duree:0.5 instrument:none)]) partition([a c3]) ] }
+      {Testing.assertEqual IsList [V3] true}
+      {Testing.assertEqual Length [V3] 110250}
+   end
 \ifndef TestCode
 end
-\endif
+ \endif
