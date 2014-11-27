@@ -32,18 +32,18 @@ local
    {Testing.assertEqual Clip [[0.1 0.2 0.3] 0.15 0.25] [0.15 0.2 0.25]}
    {Testing.assertEqual Clip [[0.1 0.2 0.3] 0.25 0.25] [0.25 0.25 0.25]}
    {Testing.assertEqual Clip [[0.1 0.2 0.3] 0.05 0.50] [0.1 0.2 0.3]}
-/*
+  /*
    % Linear Increase
    {Testing.assertEqual LinearIncrease [[3.0 3.0 3.0]] [1.0 2.0 3.0]} %TODO: Check this is the right way to do it
    {Testing.assertEqual LinearIncrease [[3.0 9.0 6.0]] [1.0 6.0 6.0]}
    {Testing.assertEqual LinearIncrease [[3.0]] [3.0]}
    {Testing.assertEqual LinearIncrease [nil] nil}
-*/
+  */
    % Fondu
    {Testing.assertEqual Fondu [[0.1 0.2 0.3] 0.0 0.0 44100] [0.1 0.2 0.3]}
-   {Testing.assertEqual Fondu [[0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1] 0.5 0.5 10] [0.02 0.04 0.06 0.08 0.1 0.1 0.08 0.06 0.04 0.02]}
-   {Testing.assertEqual Fondu [[0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1] 0.5 0.0 10] [0.02 0.04 0.06 0.08 0.1 0.1 0.1 0.1 0.1 0.1]}
-   {Testing.assertEqual Fondu [[0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1] 0.0 0.5 10] [0.1 0.1 0.1 0.1 0.1 0.1 0.08 0.06 0.04 0.02]}
+   {Testing.assertEqual Fondu [[0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1] 0.5 0.5 10] [0.0 0.025 0.05 0.075 0.1 0.1 0.075 0.05 0.025 0.0]}
+   {Testing.assertEqual Fondu [[0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1] 0.5 0.0 10] [0.0 0.025 0.05 0.075 0.1 0.1 0.1 0.1 0.1 0.1]}
+   {Testing.assertEqual Fondu [[0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1] 0.0 0.5 10] [0.1 0.1 0.1 0.1 0.1 0.1 0.075 0.05 0.025 0.0]}
 
    % Multiply
    {Testing.assertEqual Multiply [[0.2 0.4] 0.5] [0.1 0.2]}
@@ -57,6 +57,22 @@ local
    {Testing.assertEqual Add [[1 2 3] nil] [1 2 3]}
    {Testing.assertEqual Add [nil [1 2 3]] [1 2 3]}
    {Testing.assertEqual Add [nil nil] nil}
+
+   % Merge
+   {Testing.assertEqual Merge [[0.5#[0.1 0.2 0.3] 0.3#[0.1 0.2 0.3] 0.2#[0.1 0.2 0.3]]] [0.1 0.2 0.3]}
+   {Testing.assertEqual Merge [[0.4#[0.1 0.2 0.3] 0.4#[0.5 ~0.2 ~0.3] 0.2#[0.7 0.9 ~0.9]]] [0.38 0.18 ~0.18]}
+   {Testing.assertEqual Merge [[1.0#[0.1 0.2 0.3]]] [0.1 0.2 0.3]}
+   {Testing.assertEqual Merge [[0.4#nil 0.6#[0.5 ~0.2 ~0.3]]] [0.3 ~0.12 ~0.18]}
+   {Testing.assertEqual Merge [[0.4#nil 0.6#nil]] nil}
+   {Testing.assertEqual Merge [nil] nil}
+
+   % FonduEnchaine
+   {Testing.assertEqual FonduEnchaine [[0.5 0.5 0.5] [0.5 0.5 0.5] 3.0 1] [0.5 0.5 0.5]}
+   {Testing.assertEqual FonduEnchaine [[0.2 0.4 0.6 0.8 0.2 0.7 0.4] [~0.5 ~0.6 0.4 0.2] 3.0 1] [0.2 0.4 0.6 0.8 0.2 0.05 0.4 0.2]}
+   {Testing.assertEqual FonduEnchaine [[0.2 0.4 0.6 0.8] [~0.5 ~0.6 0.4 0.2 0.3 ~0.5] 3.0 1] [0.2 0.4 0.0 0.4 0.2 0.3 ~0.5]}
+   {Testing.assertEqual FonduEnchaine [nil [0.5 0.5 0.5] 0.0 1] [0.5 0.5 0.5]}
+   {Testing.assertEqual FonduEnchaine [[0.5 0.5 0.5] nil 0.0 1] [0.5 0.5 0.5]}
+   
 in
    {Browse doneTesting}
 end

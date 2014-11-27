@@ -32,13 +32,9 @@ in
       end
       {Flatten Voice}
    end
-
-
-
   
    fun {Mix Interprete Music}
       fun {ExtractVectorsToMerge MusicsWithIntensity}
-	 {Browse calledWith(MusicsWithIntensity)}
 	 case MusicsWithIntensity
 	 of nil then nil
 	 [] H|T then {ExtractVectorsToMerge H} | {ExtractVectorsToMerge T}
@@ -54,20 +50,18 @@ in
       [] voix(Voix)            then {VoixMod.voiceToAudioVector Voix Projet.hz}	       
       [] wave(FileName)        then {Projet.readFile FileName}
       [] merge(ZiksToMerge)    then {Vector.merge {ExtractVectorsToMerge ZiksToMerge}}
-      [] renverser(Zik)        then {Reverse {Mix Interprete Zik}}
-      [] repetition(nombre:Factor Zik) then {Vector.repeat {Mix Interprete Zik} Factor}
-      [] clip(bas:Low haut:High Zik)   then {Vector.clip {Mix Interprete Zik} Low High}		      
+      [] renverser(Zik)                            then {Reverse {Mix Interprete Zik}}
+      [] repetition(nombre:Factor Zik)             then {Vector.repeat {Mix Interprete Zik} Factor}
+      [] clip(bas:Low haut:High Zik)               then {Vector.clip {Mix Interprete Zik} Low High}
+      [] fondu(ouverture:Open fermeture:Close Zik) then {Vector.fondu {Mix Interprete Zik} Open Close Projet.hz}
+		       
       end
       {Flatten AudioVector}
       % 
       % [] filter          then...
-   end
-
-   % {Browse {Mix Interprete merge([0.4#partition([a b2 [c3]]) 0.6#voix([echantillon(hauteur:2 duree:0.5 instrument:none)])])}}
+   end  
    
-   
-   
-   local V1 V2 V3 in
+   local
       V1 = {Mix Interprete [partition([a b2 [c3]])] }
       {Testing.assertEqual IsList [V1] true}
       {Testing.assertEqual Length [V1] 132300}
@@ -79,6 +73,16 @@ in
       V3 = {Mix Interprete [voix([echantillon(hauteur:0 duree:0.5 instrument:none)]) partition([a c3]) ] }
       {Testing.assertEqual IsList [V3] true}
       {Testing.assertEqual Length [V3] 110250}
+
+      V4 = {Mix Interprete merge([0.4#partition([a b2 [c3]]) 0.6#voix([echantillon(hauteur:2 duree:3.5 instrument:none)])]) }
+      {Testing.assertEqual IsList [V4] true}
+      {Testing.assertEqual Length [V4] 154350}
+
+      V5 = {Mix Interprete [partition([a [c3]]) fondu(ouverture:0.2 fermeture:0.2 voix([echantillon(hauteur:0 duree:0.5 instrument:none)]))] }
+      {Testing.assertEqual IsList [V5] true}
+      {Testing.assertEqual Length [V5] 110250}
+   in
+      {Browse ok}
    end
 \ifndef TestCode
 end

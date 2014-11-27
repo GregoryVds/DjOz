@@ -2,9 +2,14 @@
 local
 
    fun {AssertEqualFloats Float1 Float2}
-      Ratio = Float1/Float2
+      Ratio
    in
-      {And (Ratio>0.999) (Ratio<1.001)}
+      if {And (Float1==0.0) (Float2==0.0)} then
+	 true
+      else
+	 Ratio = Float1/Float2
+	 {And (Ratio>0.999) (Ratio<1.001)}
+      end
    end
 
    fun {AssertEqualValues Value1 Value2}

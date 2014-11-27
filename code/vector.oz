@@ -88,9 +88,9 @@ local
 	 of nil then nil
 	 [] H|T then Factor in
 	    Factor = if (PositionFromHead =< OuvertureElementsCount) then
-			{IntToFloat PositionFromHead}/{IntToFloat OuvertureElementsCount}
+			({IntToFloat PositionFromHead}-1.0)/({IntToFloat OuvertureElementsCount}-1.0)
 		     elseif (PositionFromTail =< FermetureElementsCount) then
-			{IntToFloat PositionFromTail}/{IntToFloat FermetureElementsCount} 
+			({IntToFloat PositionFromTail}-1.0)/({IntToFloat FermetureElementsCount}-1.0)
 		     else
 			1.0
 		     end
@@ -104,7 +104,7 @@ local
    fun {Multiply Vector Factor}
       {Map Vector fun {$ Elem} Elem * Factor end } 
    end
-
+   
    fun {Add Vector1 Vector2}
       Length1 = {Length Vector1}
       Length2 = {Length Vector2}
@@ -124,13 +124,31 @@ local
       {RecAdd Longest Shortest}
    end
    
-      
-   /*fun {Merge VectorsToMerge}  
+   fun {Merge VectorsToMerge}
+      fun {RecMerge VectorsToMerge Acc}
+	 case VectorsToMerge
+	 of nil then Acc
+	 [] H|T then
+	    case H of Intensity#Vector then {RecMerge T {Add Acc {Multiply Vector Intensity}}} end
+	 end
+      end
+   in
+      {RecMerge VectorsToMerge nil}
    end
-   {Testing.assertEqual Merge [0.5#[0.1 0.2 0.3] 0.3#[0.1 0.2 0.3] 0.2#[0.1 0.2 0.3]] [expected]}
-*/
+   
+   fun {FonduEnchaine Vector1 Vector2 Duration SamplingRate}
+      V1Start V1Fondu V2Fondu V2End 
+      FonduElements = {FloatToInt Duration*{IntToFloat SamplingRate}}
+      {List.takeDrop Vector1 {Length Vector1}-FonduElements V1Start V1Fondu}
+      {List.takeDrop Vector2 FonduElements V2Fondu V2End}      
+      Mix = {Add {Fondu V1Fondu 0.0 Duration SamplingRate} {Fondu V2Fondu Duration 0.0 SamplingRate}}
+   in
+      {Append {Append V1Start Mix} V2End}
+   end
+   
+   
 \ifndef TestVector
 in
-  'export'(repeter:Repeter clip:Clip fondu:Fondu)
+  'export'(repeter:Repeter clip:Clip fondu:Fondu merge:Merge)
 end
 \endif
