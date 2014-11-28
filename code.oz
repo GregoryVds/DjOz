@@ -51,10 +51,11 @@ in
       [] wave(FileName)        then {Projet.readFile FileName}
       [] merge(ZiksToMerge)    then {Vector.merge {ExtractVectorsToMerge ZiksToMerge}}
       [] renverser(Zik)                            then {Reverse {Mix Interprete Zik}}
-      [] repetition(nombre:Factor Zik)             then {Vector.repeat {Mix Interprete Zik} Factor}
+      [] repetition(nombre:Times Zik)              then {Vector.repeat {Mix Interprete Zik} Times}
+      [] repetition(duree:Duration Zik)            then {Vector.repeatUpToDuration {Mix Interprete Zik} Duration Projet.hz}
       [] clip(bas:Low haut:High Zik)               then {Vector.clip {Mix Interprete Zik} Low High}
       [] fondu(ouverture:Open fermeture:Close Zik) then {Vector.fondu {Mix Interprete Zik} Open Close Projet.hz}
-		       
+      [] fondu_enchaine(duree:Duree Zik1 Zik2)     then {Vector.fonduEnchaine {Mix Interprete Zik1} {Mix Interprete Zik2} Duree Projet.hz}
       end
       {Flatten AudioVector}
       % 
@@ -74,13 +75,25 @@ in
       {Testing.assertEqual IsList [V3] true}
       {Testing.assertEqual Length [V3] 110250}
 
-      V4 = {Mix Interprete merge([0.4#partition([a b2 [c3]]) 0.6#voix([echantillon(hauteur:2 duree:3.5 instrument:none)])]) }
+      V4 = {Mix Interprete [merge([0.4#partition([a b2 [c3]]) 0.6#voix([echantillon(hauteur:2 duree:3.5 instrument:none)])])] }
       {Testing.assertEqual IsList [V4] true}
       {Testing.assertEqual Length [V4] 154350}
-
-      V5 = {Mix Interprete [partition([a [c3]]) fondu(ouverture:0.2 fermeture:0.2 voix([echantillon(hauteur:0 duree:0.5 instrument:none)]))] }
+      
+      V5 = {Mix Interprete [partition([a [c3]]) fondu(ouverture:0.2 fermeture:0.2 voix([echantillon(hauteur:2 duree:0.5 instrument:none)]))] }
       {Testing.assertEqual IsList [V5] true}
       {Testing.assertEqual Length [V5] 110250}
+
+      V6 = {Mix Interprete [fondu_enchaine(duree:0.5 partition([a [c3]]) voix([echantillon(hauteur:~2 duree:1.2 instrument:none)]))] }
+      {Testing.assertEqual IsList [V6] true}
+      {Testing.assertEqual Length [V6] 119070}
+
+      V7 = {Mix Interprete [repetition(duree:2.2 voix([echantillon(hauteur:0 duree:0.5 instrument:none)]))]}
+      {Testing.assertEqual IsList [V7] true}
+      {Testing.assertEqual Length [V7] 97020}
+
+      V8 = {Mix Interprete [repetition(nombre:3 voix([echantillon(hauteur:0 duree:0.5 instrument:none)]))]}
+      {Testing.assertEqual IsList [V8] true}
+      {Testing.assertEqual Length [V8] 66150}
    in
       {Browse ok}
    end

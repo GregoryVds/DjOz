@@ -5,16 +5,12 @@ local
    % Repeats a vector X times
    % Arg: a vector and an integer
    % Return: the vector passed in argument repeated X times
-   fun {RepeatTimes Vector Times}
-      fun {Repeat Counter}
-	 if (Counter==0) then
-	    nil
-	 else
-	    Vector | {RepeatTimes Vector Times-1}
-	 end
+   fun {Repeat Vector Times}
+      fun {RecRepeat Counter Acc}
+	 if (Counter==0) then Acc else {RecRepeat Counter-1 {Append Vector Acc}} end
       end
    in
-      {Flatten {Repeat Times}}
+      {RecRepeat Times nil}
    end
 
    
@@ -30,7 +26,7 @@ local
       else
 	 BasicRepeats = ElementsCount div VectorSize
 	 Remaining    = ElementsCount mod VectorSize
-	 {Flatten [{RepeatTimes Vector BasicRepeats} {List.take Vector Remaining}]}
+	 {Flatten [{Repeat Vector BasicRepeats} {List.take Vector Remaining}]}
       end
    end
 
@@ -38,12 +34,8 @@ local
    % Repeats a vector X times or up to a duration
    % Arg: a vector, the factor which is a positive or integer >=0, and the sampling rate (natural)
    % Return: a repeated vector
-   fun {Repeter Vector Factor SamplingRate}
-      if {IsFloat Factor} then
-	 {RepeatUpToElementsCount Vector {FloatToInt Factor*{IntToFloat SamplingRate}}}
-      else
-	 {RepeatTimes Vector Factor}
-      end
+   fun {RepeatUpToDuration Vector Duration SamplingRate}
+      {RepeatUpToElementsCount Vector {FloatToInt Duration*{IntToFloat SamplingRate}}}
    end
 
 
@@ -145,10 +137,39 @@ local
    in
       {Append {Append V1Start Mix} V2End}
    end
+
+   fun {Couper Vector Start End SamplingRate}
+      SamplingFloat = {IntToFloat SamplingRate}
+      IntervalStart = {FloatToInt Start*SamplingFloat}
+      IntervalEnd   = {FloatToInt End*SamplingFloat}
+      VectorLength  = {Length Vector}
+      fun {Slice Vector Position Acc}
+	 if (Position == IntervalEnd) then
+	    {Reverse Acc}
+	 elseif (Position < 0) then
+	    {Slice Vector Position+1 (0.0|Acc)}
+	 elseif ({And Position>=VectorLength Position>=IntervalStart}) then 
+	    {Slice Vector Position+1 (0.0|Acc)}
+	 else
+	    if (Position < IntervalStart) then V in
+	       V = case Vector
+		   of nil then nil
+		   [] H|T then T
+		   end	  
+	       {Slice V Position+1 Acc}
+	    else
+	       {Slice Vector.2 Position+1 (Vector.1|Acc)}
+	    end 
+	 end		 
+      end 
+   in
+      {Slice Vector {Min IntervalStart 0} nil}
+   end
+   
    
    
 \ifndef TestVector
 in
-  'export'(repeter:Repeter clip:Clip fondu:Fondu merge:Merge)
+  'export'(repeat:Repeat repeatUpToDuration:RepeatUpToDuration clip:Clip fondu:Fondu merge:Merge fonduEnchaine:FonduEnchaine)
 end
 \endif
