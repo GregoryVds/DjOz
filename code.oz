@@ -56,10 +56,9 @@ in
       [] clip(bas:Low haut:High Zik)               then {Vector.clip {Mix Interprete Zik} Low High}
       [] fondu(ouverture:Open fermeture:Close Zik) then {Vector.fondu {Mix Interprete Zik} Open Close Projet.hz}
       [] fondu_enchaine(duree:Duree Zik1 Zik2)     then {Vector.fonduEnchaine {Mix Interprete Zik1} {Mix Interprete Zik2} Duree Projet.hz}
+      [] couper(debut:Start fin:End Zik)           then {Vector.couper {Mix Interprete Zik} Start End Projet.hz}		    
       end
       {Flatten AudioVector}
-      % 
-      % [] filter          then...
    end  
    
    local
@@ -94,6 +93,10 @@ in
       V8 = {Mix Interprete [repetition(nombre:3 voix([echantillon(hauteur:0 duree:0.5 instrument:none)]))]}
       {Testing.assertEqual IsList [V8] true}
       {Testing.assertEqual Length [V8] 66150}
+
+      V9 = {Mix Interprete [couper(debut:~0.3 fin:1.4 merge([0.4#partition([a b2 [c3]]) 0.6#voix([echantillon(hauteur:2 duree:3.5 instrument:none)])]))]}
+      {Testing.assertEqual IsList [V9] true}
+      {Testing.assertEqual Length [V9] 74970}
    in
       {Browse ok}
    end

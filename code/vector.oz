@@ -170,6 +170,6 @@ local
    
 \ifndef TestVector
 in
-  'export'(repeat:Repeat repeatUpToDuration:RepeatUpToDuration clip:Clip fondu:Fondu merge:Merge fonduEnchaine:FonduEnchaine)
+  'export'(repeat:Repeat repeatUpToDuration:RepeatUpToDuration clip:Clip fondu:Fondu merge:Merge fonduEnchaine:FonduEnchaine couper:Couper)
 end
 \endif
