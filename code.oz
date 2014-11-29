@@ -41,69 +41,69 @@ in
 	 [] Float#Music then Float#{Mix Interprete Music}
 	 end      
       end
-      AudioVector
+      Vec
    in
-      AudioVector = case Music
-      of nil then nil
-      [] H|T then {Mix Interprete H} | {Mix Interprete T}
-      [] partition(Part)       then {Mix Interprete voix({Interprete Part}) }    % TODO: Optimize this and flatten?
-      [] voix(Voix)            then {VoixMod.voiceToAudioVector Voix Projet.hz}	       
-      [] wave(FileName)        then {Projet.readFile CWD#FileName}
-      [] merge(ZiksToMerge)    then {Vector.merge {ExtractVectorsToMerge ZiksToMerge}}
-      [] renverser(Zik)                            then {Reverse {Mix Interprete Zik}}
-      [] repetition(nombre:Times Zik)              then {Vector.repeat {Mix Interprete Zik} Times}
-      [] repetition(duree:Duration Zik)            then {Vector.repeatUpToDuration {Mix Interprete Zik} Duration Projet.hz}
-      [] clip(bas:Low haut:High Zik)               then {Vector.clip {Mix Interprete Zik} Low High}
-      [] fondu(ouverture:Open fermeture:Close Zik) then {Vector.fondu {Mix Interprete Zik} Open Close Projet.hz}
-      [] fondu_enchaine(duree:Duree Zik1 Zik2)     then {Vector.fonduEnchaine {Mix Interprete Zik1} {Mix Interprete Zik2} Duree Projet.hz}
-      [] couper(debut:Start fin:End Zik)           then {Vector.couper {Mix Interprete Zik} Start End Projet.hz}		    
+      Vec = case Music
+	    of nil then nil
+	    [] H|T then {Mix Interprete H} | {Mix Interprete T}
+	    [] partition(Part)       then {Mix Interprete voix({Interprete Part}) }    % TODO: Optimize this and flatten?
+	    [] voix(Voix)            then {VoixMod.voiceToAudioVector Voix Projet.hz}	       
+	    [] wave(FileName)        then {Projet.readFile CWD#FileName}
+	    [] merge(ZiksToMerge)    then {Vector.merge {ExtractVectorsToMerge ZiksToMerge}}
+	    [] renverser(Zik)                             then {Reverse {Mix Interprete Zik}}
+	    [] repetition(nombre:Times Zik)               then {Vector.repeat {Mix Interprete Zik} Times}
+	    [] repetition(duree:Duration Zik)             then {Vector.repeatUpToDuration {Mix Interprete Zik} Duration Projet.hz}
+	    [] clip(bas:Low haut:High Zik)                then {Vector.clip {Mix Interprete Zik} Low High}
+	    [] fondu(ouverture:Open fermeture:Close Zik)  then {Vector.fondu {Mix Interprete Zik} Open Close Projet.hz}
+	    [] fondu_enchaine(duree:Duree Zik1 Zik2)      then {Vector.fonduEnchaine {Mix Interprete Zik1} {Mix Interprete Zik2} Duree Projet.hz}
+	    [] couper(debut:Start fin:End Zik)            then {Vector.couper {Mix Interprete Zik} Start End Projet.hz}
+	    [] echo(delai:Delay Zik)                      then {Vector.echo {Mix Interprete Zik} Delay 1 1.0   Projet.hz}
+	    [] echo(delai:Delay decadence:Decay Zik)      then {Vector.echo {Mix Interprete Zik} Delay 1 Decay Projet.hz}
+	    [] echo(delai:D1 decadence:D2 repetition:R Z) then {Vector.echo {Mix Interprete Z}   D1    R D2    Projet.hz}
       end
-      {Flatten AudioVector}
+      {Flatten Vec}
    end  
    
    local
-      /*
+
       V1 = {Mix Interprete [partition([a b2 [c3]])] }
-      {Testing.assertEqual IsList [V1] true}
       {Testing.assertEqual Length [V1] 132300}
       
       V2 = {Mix Interprete [voix([echantillon(hauteur:2 duree:0.5 instrument:none) echantillon(hauteur:~10 duree:0.5 instrument:none)])] }
-      {Testing.assertEqual IsList [V2] true}
       {Testing.assertEqual Length [V2] 44100}
             
       V3 = {Mix Interprete [voix([echantillon(hauteur:0 duree:0.5 instrument:none)]) partition([a c3]) ] }
-      {Testing.assertEqual IsList [V3] true}
       {Testing.assertEqual Length [V3] 110250}
 
       V4 = {Mix Interprete [merge([0.4#partition([a b2 [c3]]) 0.6#voix([echantillon(hauteur:2 duree:3.5 instrument:none)])])] }
-      {Testing.assertEqual IsList [V4] true}
       {Testing.assertEqual Length [V4] 154350}
       
       V5 = {Mix Interprete [partition([a [c3]]) fondu(ouverture:0.2 fermeture:0.2 voix([echantillon(hauteur:2 duree:0.5 instrument:none)]))] }
-      {Testing.assertEqual IsList [V5] true}
       {Testing.assertEqual Length [V5] 110250}
 
       V6 = {Mix Interprete [fondu_enchaine(duree:0.5 partition([a [c3]]) voix([echantillon(hauteur:~2 duree:1.2 instrument:none)]))] }
-      {Testing.assertEqual IsList [V6] true}
       {Testing.assertEqual Length [V6] 119070}
 
       V7 = {Mix Interprete [repetition(duree:2.2 voix([echantillon(hauteur:0 duree:0.5 instrument:none)]))]}
-      {Testing.assertEqual IsList [V7] true}
       {Testing.assertEqual Length [V7] 97020}
 
       V8 = {Mix Interprete [repetition(nombre:3 voix([echantillon(hauteur:0 duree:0.5 instrument:none)]))]}
-      {Testing.assertEqual IsList [V8] true}
       {Testing.assertEqual Length [V8] 66150}
 
       V9 = {Mix Interprete [couper(debut:~0.3 fin:1.4 merge([0.4#partition([a b2 [c3]]) 0.6#voix([echantillon(hauteur:2 duree:3.5 instrument:none)])]))]}
-      {Testing.assertEqual IsList [V9] true}
       {Testing.assertEqual Length [V9] 74970}
-      */
 
       V10 = {Mix Interprete [wave('wave/animaux/cow.wav')]}
       {Testing.assertEqual IsList [V10] true}
-      
-      
+  
+      V11 = {Mix Interprete [echo(delai:1.0 [voix([echantillon(hauteur:2 duree:0.5 instrument:none) echantillon(hauteur:~10 duree:2.5 instrument:none)])] )]}
+      {Testing.assertEqual Length [V11] 176400}      
+
+      V12 = {Mix Interprete [echo(delai:1.0 decadence:1.4 [voix([echantillon(hauteur:2 duree:0.5 instrument:none) echantillon(hauteur:~10 duree:2.5 instrument:none)])] )]}
+      {Testing.assertEqual Length [V12] 176400}
+
+      V13 = {Mix Interprete [echo(delai:1.0 decadence:1.4 repetition:2 [voix([echantillon(hauteur:2 duree:0.5 instrument:none) echantillon(hauteur:~10 duree:2.5 instrument:none)])] )]}
+      {Testing.assertEqual Length [V13] 220500}
    in
       {Browse ok}
    end

@@ -150,7 +150,7 @@ local
    end
 
 
-   fun {Echo Vector Delay Repetition Decay SamplingRate} 
+   fun {Echo Vector Delay Repetition Decay SamplingRate}
       BaseVectorDuration = {IntToFloat {Length Vector}}/{IntToFloat SamplingRate}
       fun {EchoRec Acc Repetition Counter IntensityDivisor}
 	 if (Repetition==0) then
@@ -169,6 +169,6 @@ local
    
 \ifndef TestVector
 in
-  'export'(repeat:Repeat repeatUpToDuration:RepeatUpToDuration clip:Clip fondu:Fondu merge:Merge fonduEnchaine:FonduEnchaine couper:Couper)
+  'export'(repeat:Repeat repeatUpToDuration:RepeatUpToDuration clip:Clip fondu:Fondu merge:Merge fonduEnchaine:FonduEnchaine couper:Couper echo:Echo)
 end
 \endif
