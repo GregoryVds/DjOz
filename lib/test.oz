@@ -21,14 +21,18 @@ local
    end
    
    fun {AssertEqualLists L1 L2}
-      if ({Length L1} == {Length L2}) then
-	 case L1
+      case L1
+      of nil then
+	 case L2
 	 of nil then L1 == L2
-	 [] H|T then {And {AssertEqualValues H L2.1} {AssertEqualLists T L2.2}}
+	 [] _|_ then false
 	 end
-      else
-	 false	 
-      end   
+      [] H|T then
+	 case L2
+	 of nil then false
+	 [] H2|T2 then {And {AssertEqualValues H H2} {AssertEqualLists T T2}}
+	 end
+      end
    end
 
    proc {PrintAssertionMessage Result Function Expected Got Args}
@@ -66,7 +70,7 @@ in
    \ifdef DebugTest
    {Browse 'export'(assertEqual:AssertEqual)}   
    \else
-   'export'(assertEqual:AssertEqual)
+   'export'(assertEqual:AssertEqual assertEqualLists:AssertEqualLists assertEqualFloats:AssertEqualFloats)
    \endif
 end
  \undef DebugTest

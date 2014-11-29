@@ -11,37 +11,35 @@ local
 \endif
    CWD = {Property.condGet 'testcwd' '/Users/Greg/Desktop/Projet2014/'}
    [Projet] = {Link [CWD#'Projet2014_mozart2.ozf']}
-   Testing  = \insert /Users/Greg/Desktop/Projet2014/lib/test.oz
-   NoteMod  = \insert /Users/Greg/Desktop/Projet2014/code/note.oz
-   Voice    = \insert /Users/Greg/Desktop/Projet2014/code/voix.oz
+   Note     = \insert /Users/Greg/Desktop/Projet2014/code/note.oz
+   Voice    = \insert /Users/Greg/Desktop/Projet2014/code/voice.oz
    Vector   = \insert /Users/Greg/Desktop/Projet2014/code/vector.oz
 \ifndef TestCode
 in
 \endif
      
-   fun {Interprete Partition}
-      V
-   in
-      V = case Partition
+   fun {Interprete Partition} Music in
+      Music = case Partition
       of nil then nil
       [] H|T then {Interprete H} | {Interprete T}
       [] etirer(facteur:Factor Part)        then {Voice.etirer    {Interprete Part} Factor}
       [] duree(secondes:Duration Part)      then {Voice.duree     {Interprete Part} Duration}
       [] muet(Part)                         then {Voice.muet      {Interprete Part} }
-      [] bourdon(note:Note Part)            then {Voice.bourdon   {Interprete Part} {NoteMod.hauteur Note}}
+      [] bourdon(note:N Part)               then {Voice.bourdon   {Interprete Part} {Note.hauteur N}}
       [] transpose(demitons:HalfSteps Part) then {Voice.transpose {Interprete Part} HalfSteps}
-      [] Note                               then [{NoteMod.toEchantillon Note}]
+      [] N                                  then [{Note.noteToEchantillon N}]
       end
-      {Flatten V}
+      {Flatten Music}
    end
   
    fun {Mix Interprete Music}
-      fun {ExtractVectorsToMerge MusicsWithIntensity}
-	 case MusicsWithIntensity
-	 of nil then nil
-	 [] H|T then {ExtractVectorsToMerge H} | {ExtractVectorsToMerge T}
-	 [] Float#Music then Float#{Mix Interprete Music}
-	 end      
+      
+      fun {MixMusicsToMerge MusicsWithIntensity}
+	 fun {MixMusic MusicWithIntensity}
+	    case MusicWithIntensity of Float#Music then Float#{Mix Interprete Music} end
+	 end
+      in
+	 {Map MusicsWithIntensity MixMusic}
       end
 
       fun {MixMorceau Morceau}
@@ -59,7 +57,7 @@ in
 	 [] fondu(ouverture:Open fermeture:Close Zik)  then {Vector.fondu {Mix Interprete Zik} Open Close Projet.hz}
 	 [] fondu_enchaine(duree:Duree Zik1 Zik2)      then {Vector.fonduEnchaine {Mix Interprete Zik1} {Mix Interprete Zik2} Duree Projet.hz}
 	 [] couper(debut:Start fin:End Zik)            then {Vector.couper {Mix Interprete Zik} Start End Projet.hz}
-	 [] merge(ZiksToMerge)                         then {Vector.merge {ExtractVectorsToMerge ZiksToMerge}}
+	 [] merge(ZiksToMerge)                         then {Vector.merge {MixMusicsToMerge ZiksToMerge}}
 	 end
       end
    in

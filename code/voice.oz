@@ -1,13 +1,22 @@
-% \define DebugVoix
-% Transformation functions that act on a voice (flat list of echantillons)
-% - Etirer
-% - Duree
-% - Muet
-
-\ifndef TestVoix
+\ifndef TestVoice
 local
 \endif
-  
+   
+   % Mute a voice by setting hauteur to 0 for each echantillon
+   % Arg: a voice (flat list of echantillons)
+   % Return: a muted voice (hauteur = 0)
+   fun {Muet Voice}
+      fun {MuetEchantillon Echantillon}
+	   case Echantillon
+	   of silence(duree:_) then Echantillon
+	   [] echantillon(hauteur:_ duree:Duree instrument:_) then silence(duree:Duree)
+	   end
+      end
+   in
+      {Map Voice MuetEchantillon}
+   end
+
+   
    % Stretch a voice.
    % Arg: a voice (flat list of echantillons) and a strech factor as float
    % Return: a strechted voice
@@ -61,22 +70,6 @@ local
 	 end
       end
    end
-
-
-   % Mute a voice by setting hauteur to 0 for each echantillon
-   % Arg: a voice (flat list of echantillons)
-   % Return: a muted voice (hauteur = 0)
-   fun {Muet Voice}
-      fun {MuetEchantillon Echantillon}
-	   case Echantillon
-	   of silence(duree:_) then Echantillon
-	   [] echantillon(hauteur:_ duree:Duree instrument:_) then silence(duree:Duree)
-	   end
-      end
-   in
-      {Map Voice MuetEchantillon}
-   end
-
    
    % Set the hauteur of each enchantillons in a voice to a fixed value
    % Arg: a voice (flat list of echantillons) and a hauteur (integer or atom silence)
@@ -147,8 +140,8 @@ local
       {Flatten {Map Voice EchantillonToAudioVector}} %TODO: Optimize by removing Flatten?
    end
 
-\ifndef TestVoix
+\ifndef TestVoice
 in
-   'export'(etirer:Etirer duree:Duree muet:Muet bourdon:Bourdon transpose:Transpose voiceToAudioVector:VoiceToAudioVector)
+   'export'(muet:Muet duree:Duree etirer:Etirer bourdon:Bourdon transpose:Transpose voiceToAudioVector:VoiceToAudioVector)
 end
 \endif

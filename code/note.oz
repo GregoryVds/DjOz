@@ -62,7 +62,7 @@ local
    % Convert a note to an echantillon
    % Arg: note in short notation as argument (a, b3, b#4, silence)
    % Return: enchantillon of the form: echantillon(hauteur:73 duree:1.0 instrument:none)
-   fun {ToEchantillon Note}
+   fun {NoteToEchantillon Note}
       case Note
       of silence then silence(duree:1.0)
       [] _       then echantillon(hauteur:{Hauteur Note} duree:1.0 instrument:none)
@@ -71,6 +71,6 @@ local
 
 \ifndef TestNote
 in
-   'export'(toEchantillon:ToEchantillon hauteur:Hauteur)
+   'export'(noteToEchantillon:NoteToEchantillon hauteur:Hauteur)
 end
 \endif
