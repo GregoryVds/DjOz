@@ -53,23 +53,6 @@ local
 	 {Map Vector ClipElement}
       end
    end
-
-   /*
-   % Multiply each values of a vector by index/length to simulate a linear increase
-   % Arg: a vector
-   % Return: a vector
-   %fun {LinearIncrease Vector}
-      Count = {Length Vector}
-      fun {Fade Vector Position}
-	 case Vector
-	 of nil then nil
-	 [] H|T then ({IntToFloat Position}/{IntToFloat Count})*H | {Fade T Position + 1}
-	 end	 
-      end
-   in
-      {Fade Vector 1}
-   end
-*/
    
    fun {Fondu Vector Ouverture Fermeture SamplingRate}
       VectorLength = {Length Vector}

@@ -3,7 +3,7 @@
 local
    Testing = \insert /Users/Greg/Desktop/Projet2014/lib/test.oz
    \insert /Users/Greg/Desktop/Projet2014/code/vector.oz
-   /*
+
    % RepeatTimes
    {Testing.assertEqual Repeat [nil 2] nil}
    {Testing.assertEqual Repeat [[0.1 0.2 0.3] 0] nil}
@@ -29,12 +29,6 @@ local
    {Testing.assertEqual Clip [[0.1 0.2 0.3] 0.15 0.25] [0.15 0.2 0.25]}
    {Testing.assertEqual Clip [[0.1 0.2 0.3] 0.25 0.25] [0.25 0.25 0.25]}
    {Testing.assertEqual Clip [[0.1 0.2 0.3] 0.05 0.50] [0.1 0.2 0.3]}
- 
-   % Linear Increase
-   % {Testing.assertEqual LinearIncrease [[3.0 3.0 3.0]] [1.0 2.0 3.0]} %TODO: Check this is the right way to do it
-   % {Testing.assertEqual LinearIncrease [[3.0 9.0 6.0]] [1.0 6.0 6.0]}
-   % {Testing.assertEqual LinearIncrease [[3.0]] [3.0]}
-   % {Testing.assertEqual LinearIncrease [nil] nil}
   
    % Fondu
    {Testing.assertEqual Fondu [[0.1 0.2 0.3] 0.0 0.0 44100] [0.1 0.2 0.3]}
@@ -79,10 +73,9 @@ local
    {Testing.assertEqual Couper [nil 1.0 4.0 1] [0.0 0.0 0.0]}
    {Testing.assertEqual Couper [[0.5 0.5 0.5] ~5.0 ~2.0 1] [0.0 0.0 0.0]}
    {Testing.assertEqual Couper [[0.5 0.5 0.5] 5.0 8.0 1] [0.0 0.0 0.0]}
-   */
+
 
    % Echo
-   % fun {Echo Vector Delay Repetition Decay SamplingRate} 
    {Testing.assertEqual Echo [[0.2 0.4 0.6] 4.0  3  1.0  1] [0.05 0.1 0.15 0.0 0.05 0.1 0.15 0.0 0.05 0.1 0.15 0.0 0.05 0.1 0.15]}
    {Testing.assertEqual Echo [[1.0]         2.0  1  2.0  1] [(1.0/3.0) 0.0 (2.0/3.0)]}
    {Testing.assertEqual Echo [[1.0]         2.0  2  2.0  1] [(1.0/7.0) 0.0 (2.0/7.0) 0.0 (4.0/7.0)]}
