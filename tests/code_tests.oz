@@ -1,13 +1,6 @@
 \define TestCode
 
-local
-   CWD = {Property.condGet 'testcwd' '/Users/Greg/Desktop/Projet2014/'}
-   [Projet] = {Link [CWD#'Projet2014_mozart2.ozf']}
-   Testing = \insert /Users/Greg/Desktop/Projet2014/lib/test.oz
-   NoteMod  = \insert /Users/Greg/Desktop/Projet2014/code/note.oz
-   VoixMod  = \insert /Users/Greg/Desktop/Projet2014/code/voix.oz
-   Vector   = \insert /Users/Greg/Desktop/Projet2014/code/vector.oz
-   
+local   
    \insert /Users/Greg/Desktop/Projet2014/code.oz
    
    % Basic partitions
