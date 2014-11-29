@@ -69,7 +69,7 @@ local
    {Testing.assertEqual FonduEnchaine [[0.2 0.4 0.6 0.8] [~0.5 ~0.6 0.4 0.2 0.3 ~0.5] 3.0 1] [0.2 0.4 0.0 0.4 0.2 0.3 ~0.5]}
    {Testing.assertEqual FonduEnchaine [nil [0.5 0.5 0.5] 0.0 1] [0.5 0.5 0.5]}
    {Testing.assertEqual FonduEnchaine [[0.5 0.5 0.5] nil 0.0 1] [0.5 0.5 0.5]}
-   */
+
    % Couper
    % fun {Couper Vector Start End SamplingRate}
    {Testing.assertEqual Couper [[0.5 0.5 0.5] ~1.0 4.0 1] [0.0 0.5 0.5 0.5 0.0]}
@@ -79,10 +79,21 @@ local
    {Testing.assertEqual Couper [nil 1.0 4.0 1] [0.0 0.0 0.0]}
    {Testing.assertEqual Couper [[0.5 0.5 0.5] ~5.0 ~2.0 1] [0.0 0.0 0.0]}
    {Testing.assertEqual Couper [[0.5 0.5 0.5] 5.0 8.0 1] [0.0 0.0 0.0]}
-   
-   
-   
-   
+   */
+
+   % Echo
+   % fun {Echo Vector Delay Repetition Decay SamplingRate} 
+   {Testing.assertEqual Echo [[0.2 0.4 0.6] 4.0  3  1.0  1] [0.05 0.1 0.15 0.0 0.05 0.1 0.15 0.0 0.05 0.1 0.15 0.0 0.05 0.1 0.15]}
+   {Testing.assertEqual Echo [[1.0]         2.0  1  2.0  1] [(1.0/3.0) 0.0 (2.0/3.0)]}
+   {Testing.assertEqual Echo [[1.0]         2.0  2  2.0  1] [(1.0/7.0) 0.0 (2.0/7.0) 0.0 (4.0/7.0)]}
+   {Testing.assertEqual Echo [[1.0]         2.0  2  0.5  1] [(1.0/1.75) 0.0 (0.5/1.75) 0.0 (0.25/1.75)]}
+   {Testing.assertEqual Echo [[1.0]         2.0  2  0.5  1] [(1.0/1.75) 0.0 (0.5/1.75) 0.0 (0.25/1.75)]}
+   {Testing.assertEqual Echo [[0.2 0.4 0.6] 1.0  2  0.4  1] [(0.2/1.56) ((0.4+0.2*0.4)/1.56) ((0.6+0.4*0.4+0.2*0.16)/1.56) ((0.6*0.4+0.4*0.16)/1.56) (0.6*0.16/1.56)]}
+   {Testing.assertEqual Echo [[0.2 0.4 0.6] 0.0  3  0.4  1] [0.2 0.4 0.6]}
+   {Testing.assertEqual Echo [[0.2 0.4 0.6] 1.0  0  0.4  1] [0.2 0.4 0.6]}
+   {Testing.assertEqual Echo [[0.2 0.4 0.6] 1.0  2  0.0  1] [0.2 0.4 0.6 0.0 0.0]} 
+   {Testing.assertEqual Echo [nil           1.0  3  1.0  1] [0.0 0.0 0.0]}
+   {Testing.assertEqual Echo [nil           2.0  3  1.0  1] [0.0 0.0 0.0 0.0 0.0 0.0]}
 in
    {Browse doneTesting}
 end

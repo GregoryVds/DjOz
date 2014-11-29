@@ -154,7 +154,7 @@ local
 	    if (Position < IntervalStart) then V in
 	       V = case Vector
 		   of nil then nil
-		   [] H|T then T
+		   [] _|T then T
 		   end	  
 	       {Slice V Position+1 Acc}
 	    else
@@ -165,7 +165,23 @@ local
    in
       {Slice Vector {Min IntervalStart 0} nil}
    end
-   
+
+
+   fun {Echo Vector Delay Repetition Decay SamplingRate} 
+      BaseVectorDuration = {IntToFloat {Length Vector}}/{IntToFloat SamplingRate}
+      fun {EchoRec Acc Repetition Counter IntensityDivisor}
+	 if (Repetition==0) then
+	    {Multiply Acc 1.0/IntensityDivisor}
+	 else EchoedVector MixedVector EchoIntensity in
+	    EchoedVector  = {Couper Vector ~{IntToFloat (Counter+1)}*Delay BaseVectorDuration SamplingRate}
+	    EchoIntensity = {Pow Decay {IntToFloat Counter+1}}
+	    MixedVector   = {Merge [1.0#Acc EchoIntensity#EchoedVector]}
+	    {EchoRec MixedVector Repetition-1 Counter+1 IntensityDivisor+EchoIntensity}
+	 end
+      end
+   in
+      {EchoRec Vector Repetition 0 1.0}
+   end
    
    
 \ifndef TestVector

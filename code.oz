@@ -48,7 +48,7 @@ in
       [] H|T then {Mix Interprete H} | {Mix Interprete T}
       [] partition(Part)       then {Mix Interprete voix({Interprete Part}) }    % TODO: Optimize this and flatten?
       [] voix(Voix)            then {VoixMod.voiceToAudioVector Voix Projet.hz}	       
-      [] wave(FileName)        then {Projet.readFile FileName}
+      [] wave(FileName)        then {Projet.readFile CWD#FileName}
       [] merge(ZiksToMerge)    then {Vector.merge {ExtractVectorsToMerge ZiksToMerge}}
       [] renverser(Zik)                            then {Reverse {Mix Interprete Zik}}
       [] repetition(nombre:Times Zik)              then {Vector.repeat {Mix Interprete Zik} Times}
@@ -62,6 +62,7 @@ in
    end  
    
    local
+      /*
       V1 = {Mix Interprete [partition([a b2 [c3]])] }
       {Testing.assertEqual IsList [V1] true}
       {Testing.assertEqual Length [V1] 132300}
@@ -97,6 +98,12 @@ in
       V9 = {Mix Interprete [couper(debut:~0.3 fin:1.4 merge([0.4#partition([a b2 [c3]]) 0.6#voix([echantillon(hauteur:2 duree:3.5 instrument:none)])]))]}
       {Testing.assertEqual IsList [V9] true}
       {Testing.assertEqual Length [V9] 74970}
+      */
+
+      V10 = {Mix Interprete [wave('wave/animaux/cow.wav')]}
+      {Testing.assertEqual IsList [V10] true}
+      
+      
    in
       {Browse ok}
    end
