@@ -64,30 +64,6 @@ local
    {Test.assertEqual Transpose [[echantillon(hauteur:1  duree:1.0 instrument:none) silence(duree:1.0)]  5]
                                    [echantillon(hauteur:6  duree:1.0 instrument:none) silence(duree:1.0)] }
 
-   % HauteurToFrequency
-   {Test.assertEqual HauteurToFrequency 0  440.0}
-   {Test.assertEqual HauteurToFrequency 10 783.99}
-   {Test.assertEqual HauteurToFrequency ~2 392.0}
-
-
-   % BuildAudioVector
-   local Vector1 Vector2 in
-      Vector1 = {BuildAudioVector 440.0 0.001 44100}
-      {Test.assertEqual Length [Vector1] 44}
-      {Test.assertEqual Nth [Vector1 10] 0.293316}
-      {Test.assertEqual Nth [Vector1 35] 0.405969}
-      Vector2 = {BuildAudioVector 783.99 0.005 44100}
-      {Test.assertEqual Length [Vector2] 220}
-      {Test.assertEqual Nth [Vector2 10] 0.449393}
-   end
-
-   % VoiceToAudioVector
-   local Vector1 in
-      Vector1 = {VoiceToAudioVector [echantillon(hauteur:10 duree:0.00025 instrument:none) echantillon(hauteur:~2 duree:0.0005 instrument:none)] 44100}
-      {Test.assertEqual Length [Vector1] 33}
-      {Test.assertEqual Nth [Vector1 10] 0.449393}
-      {Test.assertEqual Nth [Vector1 20] 0.240876}
-   end  
 in
    {Browse doneTestingVoice}
 end

@@ -3,7 +3,10 @@
 local
    Test = \insert /Users/Greg/Desktop/Projet2014/lib/test.oz
    \insert /Users/Greg/Desktop/Projet2014/code.oz
-   
+
+
+   {Test.assertEqual Length [{Mix Interprete [partition(transpose(demitons:20 b))] }] 44100}
+   /*
    % Basic partitions
    {Test.assertEqual Interprete nil nil}      
    {Test.assertEqual Interprete b [echantillon(hauteur:2 duree:1.0 instrument:none)] }      
@@ -97,9 +100,11 @@ local
       V16 = {Mix Interprete [echo(delai:1.0 decadence:0.5 repetition:2 [partition([a b2 [c3]])])]}
       V17 = {Mix Interprete [merge([(1.0/1.75)#[partition([a b2 [c3]])] (0.5/1.75)#[voix([silence(duree:1.0)]) partition([a b2 [c3]])] (0.25/1.75)#[voix([silence(duree:2.0)]) partition([a b2 [c3]])]])]}
       {Test.assertEqual Test.assertEqualLists [V16 V17] true}
+
    in
       {Browse ok}
    end
+       */
 in
    {Browse doneTestingCode}
 end

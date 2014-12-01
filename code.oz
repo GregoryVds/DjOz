@@ -9,7 +9,7 @@ local
    Interprete
    Mix
 \endif
-   CWD = {Property.condGet 'testcwd' '/Users/Greg/Desktop/Projet2014/'}
+   CWD      = {Property.condGet 'testcwd' '/Users/Greg/Desktop/Projet2014/'}
    [Projet] = {Link [CWD#'Projet2014_mozart2.ozf']}
    Note     = \insert /Users/Greg/Desktop/Projet2014/code/note.oz
    Voice    = \insert /Users/Greg/Desktop/Projet2014/code/voice.oz
@@ -17,7 +17,7 @@ local
 \ifndef TestCode
 in
 \endif
-     
+
    fun {Interprete Partition} Music in
       Music = case Partition
       of nil then nil
@@ -31,9 +31,8 @@ in
       end
       {Flatten Music}
    end
-  
+
    fun {Mix Interprete Music}
-      
       fun {MixMusicsToMerge MusicsWithIntensity}
 	 fun {MixMusic MusicWithIntensity}
 	    case MusicWithIntensity of Float#Music then Float#{Mix Interprete Music} end
@@ -41,10 +40,10 @@ in
       in
 	 {Map MusicsWithIntensity MixMusic}
       end
-
+      
       fun {MixMorceau Morceau}
 	 case Morceau
-	 of voix(Voix)                                 then {Voice.voiceToAudioVector Voix Projet.hz}
+	 of voix(Voix)                                 then {Vector.buildFromVoice Voix Projet.hz}
 	 [] partition(Part)                            then {MixMorceau voix({Interprete Part}) }  
 	 [] wave(FileName)                             then {Projet.readFile CWD#FileName}
 	 [] renverser(Zik)                             then {Reverse {Mix Interprete Zik}}
@@ -62,7 +61,15 @@ in
       end
    in
       {Flatten {Map Music MixMorceau}}
-   end  
+   end
+
+   % Votre code DOIT appeler Projet.run UNE SEULE fois.  Lors de cet appel,
+   % vous devez mixer une musique qui démontre les fonctionalités de votre
+   % programme.
+   %
+   % Si votre code devait ne pas passer nos tests, cet exemple serait le
+   % seul qui ateste de la validité de votre implémentation.
+   {Browse {Projet.run Mix Interprete {Projet.load CWD#'example.dj.oz'} CWD#'out.wav'}}
    
 \ifndef TestCode
 end

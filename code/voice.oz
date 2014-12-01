@@ -102,46 +102,8 @@ local
       {Map Voice TransposeEchantillon}
    end
 
-
-   % Convert an hauteur to a frequency
-   % Arg: Hauteur as integer (+ or -)
-   % Return: A frequency as float >= 0
-   fun {HauteurToFrequency Hauteur}
-      {Pow 2.0 ({IntToFloat Hauteur}/12.0)} * 440.0
-   end
-
-   
-   % Build an audio vector for a frequency and a duree
-   % Arg: Frequency as float (>= 0) and duree as float (>= 0)
-   % Return: An audio vector (list of floats between -1 and 1) of size Duree*Projet.hz 
-   fun {BuildAudioVector Frequency Duree SamplingRate}
-      Pi   = 3.14159265358979323846 %TODO: How to get Pi in a clever way?
-      Temp = (2.0*Pi*Frequency)/{IntToFloat SamplingRate}
-      ValuesCount = {FloatToInt Duree*{IntToFloat SamplingRate}}
-      fun {AudioVector I}
-	 if I>ValuesCount then nil else (0.5 * {Sin (Temp*{IntToFloat I})}) | {AudioVector I+1} end
-      end
-   in
-      {AudioVector 1}
-   end
-
-   
-   % Converts a voice (flat list of echantillons) to an audio vector
-   % Arg: A voice
-   % Return: An audio vector (list of floats between -1 and 1) 
-   fun {VoiceToAudioVector Voice SamplingRate}
-      fun {EchantillonToAudioVector Echantillon}
-	 case Echantillon
-	 of silence(duree:Duree) then {BuildAudioVector 0.0 Duree SamplingRate}
-	 [] echantillon(hauteur:Hauteur duree:Duree instrument:_) then {BuildAudioVector {HauteurToFrequency Hauteur} Duree SamplingRate} %TODO: Use instrument
-	 end
-      end
-   in
-      {Flatten {Map Voice EchantillonToAudioVector}} %TODO: Optimize by removing Flatten?
-   end
-
 \ifndef TestVoice
 in
-   'export'(muet:Muet duree:Duree etirer:Etirer bourdon:Bourdon transpose:Transpose voiceToAudioVector:VoiceToAudioVector)
+   'export'(muet:Muet duree:Duree etirer:Etirer bourdon:Bourdon transpose:Transpose)
 end
 \endif

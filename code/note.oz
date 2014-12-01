@@ -2,9 +2,10 @@
 local
 \endif
    
-   % Convert a note from short notation to extended notation
-   % Arg: note in short notation (a, b3, b#4, silence)
+   % Convert a note from its short notation to its extended notation
+   % Arg: Note - a note in short notation (Ex: a, b3, b#4, silence)
    % Returns: a note in extended form like note(name:a octave:3 alteration:none)
+   % Complexity: O(1) - Since length of the atom is max 3
    fun {ExtendNote Note}
       case Note
       of silence     then note(nom:silence octave:4 alteration:none)
@@ -18,11 +19,11 @@ local
    end
 
    
-   % Compute the distance of the extended note from A
-   % Notes in order are c c# d d# e f f# g g# a a# b
-   % distance = a_position - note_position
-   % Arg: note in extended notation but not silence
-   % Return: a distance as integer from -9 to +2 included
+   % Compute the distance of the note from note "a" is the same musical scale
+   % Notes in order are: c c# d d# e f f# g g# a a# b
+   % Arg: ExtendedNote - a note in extended notation (but not "silence")
+   % Return: a distance as integer ranging from -9 to +2 included
+   % Complexity: O(1)
    fun {DistanceFromA ExtendedNote}
       case ExtendedNote.nom
       of c andthen ExtendedNote.alteration == '#' then ~8
@@ -42,10 +43,12 @@ local
    end
    
    
-   % Count the number of half-steps of a note from note a4
+   % Count the number of half-steps of note from note a4
    % halfs_steps = note_distance_from_A + octave_distance_to_4 * 12
-   % Arg: note in short notation (a, b3, b#4)
-   % Return: half-steps from a4 as integer (Z) or silence
+   % Arg: Note - a note in short notation (a, b3, b#4, silence)
+   % Return: half-steps from a4 as positive or negative integer.
+   % If note "silence" was passed as argument, returns silence.
+   % Complexity: O(1)
    fun {Hauteur Note}
       ExtendedNote NoteDistance OctaveDistance
    in
@@ -60,8 +63,9 @@ local
 
    
    % Convert a note to an echantillon
-   % Arg: note in short notation as argument (a, b3, b#4, silence)
-   % Return: enchantillon of the form: echantillon(hauteur:73 duree:1.0 instrument:none)
+   % Arg: Note - a note in short notation (a, b3, b#4, silence)
+   % Return: an enchantillon of the form echantillon(hauteur:73 duree:1.0 instrument:none)
+   % Complexity: O(1)
    fun {NoteToEchantillon Note}
       case Note
       of silence then silence(duree:1.0)
