@@ -27,7 +27,7 @@ local
       {Test.assertEqual Nth [Vector1 10] 0.449393}
       {Test.assertEqual Nth [Vector1 20] 0.240876}
    end
-   
+   /*
    % RepeatTimes
    {Test.assertEqual Repeat [nil 2] nil}
    {Test.assertEqual Repeat [[0.1 0.2 0.3] 0] nil}
@@ -111,7 +111,7 @@ local
    {Test.assertEqual Echo [[0.2 0.4 0.6] 1.0  2  0.0  1] [0.2 0.4 0.6 0.0 0.0]} 
    {Test.assertEqual Echo [nil           1.0  3  1.0  1] [0.0 0.0 0.0]}
    {Test.assertEqual Echo [nil           2.0  3  1.0  1] [0.0 0.0 0.0 0.0 0.0 0.0]}
-   
+   */
 in
    {Browse doneTestingVector}
 end

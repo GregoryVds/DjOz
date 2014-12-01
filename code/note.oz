@@ -1,6 +1,21 @@
 \ifndef TestNote
 local
 \endif
+   NotesList = [n(n:a a:none) n(n:a a:'#')  n(n:b a:none) n(n:c a:none) n(n:c a:'#')  n(n:d a:none)
+		n(n:d a:'#')  n(n:e a:none) n(n:f a:none) n(n:f a:'#')  n(n:g a:none) n(n:g a:'#')]
+   NotesListLength = {Length NotesList}
+   
+   fun {PositionInList Elem List}
+      fun {PositionInListAcc List Acc}
+	 case List
+	 of nil then ~1
+	 [] H|T then
+	    if H==Elem then Acc else {PositionInListAcc T Acc+1} end
+	 end
+      end
+   in
+      {PositionInListAcc List 0}
+   end
    
    % Convert a note from its short notation to its extended notation
    % Arg: Note - a note in short notation (Ex: a, b3, b#4, silence)
@@ -25,24 +40,12 @@ local
    % Return: a distance as integer ranging from -9 to +2 included
    % Complexity: O(1)
    fun {DistanceFromA ExtendedNote}
-      case ExtendedNote.nom
-      of c andthen ExtendedNote.alteration == '#' then ~8
-      [] c then ~9
-      [] d andthen ExtendedNote.alteration == '#' then ~6
-      [] d then ~7
-      [] e then ~5
-      [] f andthen ExtendedNote.alteration == '#' then ~3
-      [] f then ~4
-      [] g andthen ExtendedNote.alteration == '#' then ~1
-      [] g then ~2
-      [] a andthen ExtendedNote.alteration == '#' then 1
-      [] a then 0
-      [] b then 2
-      else raise wrongArgument(function:DistanceFromA arg:ExtendedNote) end
-      end     
+      DistanceInList = {PositionInList n(n:ExtendedNote.nom a:ExtendedNote.alteration) NotesList}
+   in
+      if DistanceInList > 2 then ~(NotesListLength - DistanceInList) else DistanceInList end
    end
    
-   
+
    % Count the number of half-steps of note from note a4
    % halfs_steps = note_distance_from_A + octave_distance_to_4 * 12
    % Arg: Note - a note in short notation (a, b3, b#4, silence)
@@ -72,7 +75,18 @@ local
       [] _       then echantillon(hauteur:{Hauteur Note} duree:1.0 instrument:none)
       end
    end
-
+      
+   fun {HauteurToNote Hauteur}
+      Octave = 4 + (Hauteur div NotesListLength)
+      NoteDistance = Hauteur mod NotesListLength
+      NotePosition
+      N
+   in
+      NotePosition = if (NoteDistance < 0) then NotesListLength+NoteDistance+1 else NoteDistance+1 end
+      N = {Nth NotesList NotePosition} 
+      note(nom:N.n octave:Octave alteration:N.a)      
+   end    
+   
 \ifndef TestNote
 in
    'export'(noteToEchantillon:NoteToEchantillon hauteur:Hauteur)
