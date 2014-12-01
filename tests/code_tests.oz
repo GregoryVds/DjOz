@@ -4,8 +4,7 @@ local
    Test = \insert /Users/Greg/Desktop/Projet2014/lib/test.oz
    \insert /Users/Greg/Desktop/Projet2014/code.oz
 
-
-   {Test.assertEqual Length [{Mix Interprete [partition(transpose(demitons:20 b))] }] 44100}
+  
    /*
    % Basic partitions
    {Test.assertEqual Interprete nil nil}      
@@ -52,6 +51,13 @@ local
    {Test.assertEqual Interprete [ [c3 bourdon(note:c2 etirer(facteur:2.0 [b c2]))] ]
     [echantillon(hauteur:~21 duree:1.0 instrument:none) echantillon(hauteur:~33 duree:2.0 instrument:none) echantillon(hauteur:~33 duree:2.0 instrument:none)] }
 
+   */
+
+   % Instruments
+                       
+   {Test.assertEqual Test.assertEqualLists [{Interprete instrument(nom:woody a4)} {Interprete instrument(nom:drums instrument(nom:woody a4))}] true}
+   /*
+   
    % MIX
    local
       V1 = {Mix Interprete [partition([a b2 [c3]])] }

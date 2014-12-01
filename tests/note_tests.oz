@@ -28,10 +28,10 @@ local
    {Test.assertEqual Hauteur silence silence}
 
    % ToEchantillon
-   {Test.assertEqual NoteToEchantillon d#2      echantillon(hauteur:~30  duree:1.0 instrument:none)}
-   {Test.assertEqual NoteToEchantillon a        echantillon(hauteur:0    duree:1.0 instrument:none)}
-   {Test.assertEqual NoteToEchantillon d2       echantillon(hauteur:~31  duree:1.0 instrument:none)}
-   {Test.assertEqual NoteToEchantillon silence  silence(duree:1.0)}
+   {Test.assertEqual NoteToEchantillon [d#2 woody]    echantillon(hauteur:~30  duree:1.0 instrument:woody)}
+   {Test.assertEqual NoteToEchantillon [a none]       echantillon(hauteur:0    duree:1.0 instrument:none)}
+   {Test.assertEqual NoteToEchantillon [d2 drums]     echantillon(hauteur:~31  duree:1.0 instrument:drums)}
+   {Test.assertEqual NoteToEchantillon [silence none] silence(duree:1.0)}
 
    % HauteurToNote
    {Test.assertEqual HauteurToNote   2 note(nom:b octave:4 alteration:none)}

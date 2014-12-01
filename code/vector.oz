@@ -172,7 +172,6 @@ local
    fun {HauteurToFrequency Hauteur}
       {Pow 2.0 ({IntToFloat Hauteur}/12.0)} * 440.0
    end
-
    
    % Build an audio vector for a frequency and a duree
    % Arg: Frequency as float (>= 0) and duree as float (>= 0)
@@ -188,29 +187,39 @@ local
       {AudioVector 1}
    end
 
-   fun {BuildAudioVectorWithSmoothing Frequency Duree SamplingRate}
-      Smoothing = 0.15*Duree
-   in 
-      {Fondu {BuildAudioVector Frequency Duree SamplingRate} Smoothing Smoothing SamplingRate}
+   fun {SmoothenVector Vector Duration SamplingRate}
+      Smoothing = 0.15*Duration
+   in
+      {Fondu Vector Smoothing Smoothing SamplingRate}
    end
-      
-   % Converts a voice (flat list of echantillons) to an audio vector
-   % Arg: A voice
-   % Return: An audio vector (list of floats between -1 and 1) 
-   fun {BuildFromVoice Voice SamplingRate}
+   
+   fun {VectorFromEnchantillon Frequency Duree SamplingRate}
+      {SmoothenVector {BuildAudioVector Frequency Duree SamplingRate} Duree SamplingRate}
+   end
+
+   fun {FilePath Note Instrument}
+      {VirtualString.toAtom CWD#'wave/instruments/'#Instrument#'_'#Note.nom#Note.octave#(if Note.alteration == none then '' else "#" end)#'.wav'}
+   end
+
+   fun {VectorFromInstrument Instrument Hauteur Duree SamplingRate}
+      {SmoothenVector {RepeatUpToDuration {Projet.readFile {FilePath {Note.hauteurToNote Hauteur} Instrument}} Duree SamplingRate} Duree SamplingRate}
+   end
+
+   fun {VectorFromVoice Voice}
       fun {EchantillonToAudioVector Echantillon}
 	 case Echantillon
-	 of silence(duree:Duree) then {BuildAudioVectorWithSmoothing 0.0 Duree SamplingRate}
-	 [] echantillon(hauteur:Hauteur duree:Duree instrument:_) then {BuildAudioVectorWithSmoothing {HauteurToFrequency Hauteur} Duree SamplingRate} %TODO: Use instrument
+	 of silence(duree:Duree)                                           then {VectorFromEnchantillon 0.0 Duree Projet.hz}
+	 [] echantillon(hauteur:Hauteur duree:Duree instrument:none)       then {VectorFromEnchantillon {HauteurToFrequency Hauteur} Duree Projet.hz}
+	 [] echantillon(hauteur:Hauteur duree:Duree instrument:Instrument) then {VectorFromInstrument Instrument Hauteur Duree Projet.hz}
 	 end
       end
    in
-      {Flatten {Map Voice EchantillonToAudioVector}} %TODO: Optimize by removing Flatten?
+      {Flatten {Map Voice EchantillonToAudioVector}}
    end
    
-   
+
 \ifndef TestVector
 in
-  'export'(buildFromVoice:BuildFromVoice repeat:Repeat repeatUpToDuration:RepeatUpToDuration clip:Clip fondu:Fondu merge:Merge fonduEnchaine:FonduEnchaine couper:Couper echo:Echo)
+  'export'(vectorFromVoice:VectorFromVoice repeat:Repeat repeatUpToDuration:RepeatUpToDuration clip:Clip fondu:Fondu merge:Merge fonduEnchaine:FonduEnchaine couper:Couper echo:Echo)
 end
 \endif

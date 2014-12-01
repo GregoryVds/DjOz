@@ -69,13 +69,13 @@ local
    % Arg: Note - a note in short notation (a, b3, b#4, silence)
    % Return: an enchantillon of the form echantillon(hauteur:73 duree:1.0 instrument:none)
    % Complexity: O(1)
-   fun {NoteToEchantillon Note}
+   fun {NoteToEchantillon Note Instrument}
       case Note
       of silence then silence(duree:1.0)
-      [] _       then echantillon(hauteur:{Hauteur Note} duree:1.0 instrument:none)
+      [] _       then echantillon(hauteur:{Hauteur Note} duree:1.0 instrument:Instrument)
       end
    end
-      
+
    fun {HauteurToNote Hauteur}
       Octave = 4 + (Hauteur div NotesListLength)
       NoteDistance = Hauteur mod NotesListLength
@@ -89,6 +89,6 @@ local
    
 \ifndef TestNote
 in
-   'export'(noteToEchantillon:NoteToEchantillon hauteur:Hauteur)
+   'export'(noteToEchantillon:NoteToEchantillon hauteur:Hauteur hauteurToNote:HauteurToNote)
 end
 \endif

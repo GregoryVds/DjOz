@@ -18,20 +18,26 @@ local
 in
 \endif
 
-   fun {Interprete Partition} Music in
-      Music = case Partition
-      of nil then nil
-      [] H|T then {Interprete H} | {Interprete T}
-      [] etirer(facteur:Factor Part)        then {Voice.etirer    {Interprete Part} Factor}
-      [] duree(secondes:Duration Part)      then {Voice.duree     {Interprete Part} Duration}
-      [] muet(Part)                         then {Voice.muet      {Interprete Part} }
-      [] bourdon(note:N Part)               then {Voice.bourdon   {Interprete Part} {Note.hauteur N}}
-      [] transpose(demitons:HalfSteps Part) then {Voice.transpose {Interprete Part} HalfSteps}
-      [] N                                  then [{Note.noteToEchantillon N}]
+   fun {Interprete Partition}
+      fun {InterpreteWithInstrument Partition Instrument} M in
+	 M = case Partition
+	     of nil then nil
+	     [] H|T then {InterpreteWithInstrument H Instrument} | {InterpreteWithInstrument T Instrument}
+	     [] etirer(facteur:Factor Part)        then {Voice.etirer    {InterpreteWithInstrument Part Instrument} Factor}
+	     [] duree(secondes:Duration Part)      then {Voice.duree     {InterpreteWithInstrument Part Instrument} Duration}
+	     [] muet(Part)                         then {Voice.muet      {InterpreteWithInstrument Part Instrument} }
+	     [] bourdon(note:N Part)               then {Voice.bourdon   {InterpreteWithInstrument Part Instrument} {Note.hauteur N}}
+	     [] transpose(demitons:HalfSteps Part) then {Voice.transpose {InterpreteWithInstrument Part Instrument} HalfSteps}
+	     [] instrument(nom:Inst Part)          then {InterpreteWithInstrument Part Inst}
+	     [] N                                  then [{Note.noteToEchantillon N Instrument}]
+	     end
+	 {Flatten M}
       end
-      {Flatten Music}
+   in
+      {InterpreteWithInstrument Partition none}
    end
-
+   
+	
    fun {Mix Interprete Music}
       fun {MixMusicsToMerge MusicsWithIntensity}
 	 fun {MixMusic MusicWithIntensity}
@@ -43,7 +49,7 @@ in
       
       fun {MixMorceau Morceau}
 	 case Morceau
-	 of voix(Voix)                                 then {Vector.buildFromVoice Voix Projet.hz}
+	 of voix(Voix)                                 then {Vector.vectorFromVoice Voix}
 	 [] partition(Part)                            then {MixMorceau voix({Interprete Part}) }  
 	 [] wave(FileName)                             then {Projet.readFile CWD#FileName}
 	 [] renverser(Zik)                             then {Reverse {Mix Interprete Zik}}

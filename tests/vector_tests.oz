@@ -1,9 +1,14 @@
 \define TestVector
 
 local
-   Test = \insert /Users/Greg/Desktop/Projet2014/lib/test.oz
-   \insert /Users/Greg/Desktop/Projet2014/code/vector.oz
+   CWD      = {Property.condGet 'testcwd' '/Users/Greg/Desktop/Projet2014/'}
+   [Projet] = {Link [CWD#'Projet2014_mozart2.ozf']}
+   Note     = \insert /Users/Greg/Desktop/Projet2014/code/note.oz
+   Test     = \insert /Users/Greg/Desktop/Projet2014/lib/test.oz
 
+   
+   \insert /Users/Greg/Desktop/Projet2014/code/vector.oz
+   /*
    % HauteurToFrequency
    {Test.assertEqual HauteurToFrequency 0  440.0}
    {Test.assertEqual HauteurToFrequency 10 783.99}
@@ -20,14 +25,6 @@ local
       {Test.assertEqual Nth [Vector2 10] 0.449393}
    end
 
-   % BuildFromVoice
-   local Vector1 in
-      Vector1 = {BuildFromVoice [echantillon(hauteur:10 duree:0.00025 instrument:none) echantillon(hauteur:~2 duree:0.0005 instrument:none)] 44100}
-      {Test.assertEqual Length [Vector1] 33}
-      {Test.assertEqual Nth [Vector1 10] 0.449393}
-      {Test.assertEqual Nth [Vector1 20] 0.240876}
-   end
-   /*
    % RepeatTimes
    {Test.assertEqual Repeat [nil 2] nil}
    {Test.assertEqual Repeat [[0.1 0.2 0.3] 0] nil}
@@ -112,6 +109,28 @@ local
    {Test.assertEqual Echo [nil           1.0  3  1.0  1] [0.0 0.0 0.0]}
    {Test.assertEqual Echo [nil           2.0  3  1.0  1] [0.0 0.0 0.0 0.0 0.0 0.0]}
    */
+
+   % BuildFromVoice
+   local Vector1 in
+      Vector1 = {VectorFromVoice [echantillon(hauteur:10 duree:0.00025 instrument:none) echantillon(hauteur:~2 duree:0.0005 instrument:none)]}
+      {Test.assertEqual Length [Vector1] 33}
+      {Test.assertEqual Nth [Vector1 10] 0.449393}
+      {Test.assertEqual Nth [Vector1 20] 0.240876}
+   end
+   
+   
+   % FilePath
+   {Test.assertEqual FilePath [note(nom:a octave:3 alteration:none) woody]      {VirtualString.toAtom CWD#'wave/instruments/woody_a3.wav'}}
+   {Test.assertEqual FilePath [note(nom:a octave:3 alteration:'#') woody]       {VirtualString.toAtom CWD#'wave/instruments/woody_a3#.wav'}}
+   {Test.assertEqual FilePath [note(nom:g octave:2 alteration:'#') '8bit_stab'] {VirtualString.toAtom CWD#'wave/instruments/8bit_stab_g2#.wav'}}
+
+   % VectorFromInstrument
+   {Test.assertEqual Length [{VectorFromInstrument woody ~10 1.0 44100}] 44100}
+   {Test.assertEqual Length [{VectorFromInstrument woody ~10 2.0 44100}] 88200}
+   {Test.assertEqual Length [{VectorFromInstrument woody   0 0.5 44100}] 22050}
+   
+   
+   
 in
    {Browse doneTestingVector}
 end
