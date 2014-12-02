@@ -1,5 +1,7 @@
-\define TestCode
+% Author: VANDER SCHUEREN Gregory
+% Date: December 2014
 
+\define TestCode
 local
    Test = \insert /Users/Greg/Desktop/Projet2014/lib/test.oz
    \insert /Users/Greg/Desktop/Projet2014/code.oz

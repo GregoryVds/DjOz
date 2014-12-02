@@ -1,3 +1,6 @@
+% Author: VANDER SCHUEREN Gregory
+% Date: December 2014
+
 % Expose 5 fonctions that apply transformations on musical voices (flat list of echantillons)
 % - muet:      mute a voice by replacing all enchantillons by silences
 % - etirer:    stretch a voice (final duration is original duration multiplied by strech factor)

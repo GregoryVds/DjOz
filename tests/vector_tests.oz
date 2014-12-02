@@ -1,5 +1,7 @@
-\define TestVector
+% Author: VANDER SCHUEREN Gregory
+% Date: December 2014
 
+\define TestVector
 local
    CWD         = {Property.condGet 'testcwd' '/Users/Greg/Desktop/Projet2014/'}
    [Projet]    = {Link [CWD#'Projet2014_mozart2.ozf']}

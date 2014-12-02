@@ -1,3 +1,6 @@
+% Author: VANDER SCHUEREN Gregory
+% Date: December 2014
+
 % Expose 3 helpers functions to work with lists
 % positionInList:          returns the position of an element in a list (starting at 0)
 % repeat:                  repeat a list X times

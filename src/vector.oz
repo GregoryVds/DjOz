@@ -1,3 +1,6 @@
+% Author: VANDER SCHUEREN Gregory
+% Date: December 2014
+
 % Expose 9 fonctions that apply filters on musical vectors
 % A musical vector is list of floats >= -1 and <= 1
 % - repeat:             repeat a musical vector X times

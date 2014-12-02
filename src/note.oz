@@ -1,3 +1,6 @@
+% Author: VANDER SCHUEREN Gregory
+% Date: December 2014
+
 % Expose 3 fonctions related to musical notes:
 % - noteToEchantillon:  convert a note to an echantillon
 % - hauteur:            count the number of half-steps between a note and a4

@@ -1,5 +1,7 @@
-\define TestListHelpers
+% Author: VANDER SCHUEREN Gregory
+% Date: December 2014
 
+\define TestListHelpers
 local
    Test = \insert /Users/Greg/Desktop/Projet2014/lib/test.oz
    \insert /Users/Greg/Desktop/Projet2014/lib/list_helpers.oz

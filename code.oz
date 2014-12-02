@@ -1,3 +1,6 @@
+% Author: VANDER SCHUEREN Gregory
+% Date: December 2014
+
 \ifndef TestCode
 local
    Interprete Mix

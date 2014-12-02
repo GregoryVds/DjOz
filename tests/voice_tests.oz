@@ -1,5 +1,7 @@
-\define TestVoice
+% Author: VANDER SCHUEREN Gregory
+% Date: December 2014
 
+\define TestVoice
 local
    Test = \insert /Users/Greg/Desktop/Projet2014/lib/test.oz
    \insert /Users/Greg/Desktop/Projet2014/src/voice.oz

@@ -1,4 +1,6 @@
-%\define DebugTest
+% Author: VANDER SCHUEREN Gregory
+% Date: December 2014
+
 local
 
    fun {AssertEqualFloats Float1 Float2}
@@ -63,14 +65,7 @@ local
            
       {PrintAssertionMessage AssertResult Function Expected Got Args}
    end
-
-
    
 in
-   \ifdef DebugTest
-   {Browse 'export'(assertEqual:AssertEqual)}   
-   \else
    'export'(assertEqual:AssertEqual assertEqualLists:AssertEqualLists assertEqualFloats:AssertEqualFloats)
-   \endif
 end
- \undef DebugTest

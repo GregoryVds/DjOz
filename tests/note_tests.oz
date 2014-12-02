@@ -1,5 +1,7 @@
-\define TestNote
+% Author: VANDER SCHUEREN Gregory
+% Date: December 2014
 
+\define TestNote
 local
    Test        = \insert /Users/Greg/Desktop/Projet2014/lib/test.oz
    ListHelpers = \insert /Users/Greg/Desktop/Projet2014/lib/list_helpers.oz
