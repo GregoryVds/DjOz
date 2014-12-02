@@ -39,12 +39,7 @@ local
    {Test.assertEqual HauteurToNote  ~1 note(nom:g octave:4 alteration:'#')}
    {Test.assertEqual HauteurToNote  13 note(nom:a octave:5 alteration:'#')}
    {Test.assertEqual HauteurToNote ~25 note(nom:g octave:2 alteration:'#')}
-
-   % Position in list
-   {Test.assertEqual PositionInList [a [a b c]] 0}
-   {Test.assertEqual PositionInList [b [a b c]] 1}
-   {Test.assertEqual PositionInList [d [a b c]] ~1}
 in
-   {Browse doneTest}
+   {Browse doneTestingNote}
 end
 \undef TestNote

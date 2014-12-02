@@ -1,16 +1,15 @@
 % Hymne à la joie.
 local
-   Tune = [b b c5 d5 d5 c5 b a g g a b]
-   End1 = [etirer(facteur:1.5 b) etirer(facteur:0.5 a) etirer(facteur:2.0 a)]
-   End2 = [etirer(facteur:1.5 a) etirer(facteur:0.5 g) etirer(facteur:2.0 g)]
-   Interlude = [a a b g a etirer(facteur:0.5 [b c5])
-                    b g a etirer(facteur:0.5 [b c5])
-                b a g a etirer(facteur:2.0 d) ]
+   Base  = [c#3 d4 c#3]
+   Quick = [etirer(facteur:(2.0/3.0) Base)]
+   Slow  = Base
+   Intro = [etirer(facteur:0.6 [a1 Slow a1 Quick a2 Slow a2 Quick f#2 Slow f#2 Quick f2 Slow f2 Quick])]
 
+   Top      = [c#2 e1 c#2]
+   TopQuick = [etirer(facteur:(2.0/3.0) Top)]
+   Chorus = [a3 Top a3 TopQuick c#4 Top c#4 TopQuick e4 Top e4 Top]
+   Partition = [Intro Chorus]
    % Ceci n'est pas une musique
-   Partition = instrument(nom:woody [Tune End1 Tune End2 Interlude Tune End2])
 in
-   % Ceci est une musique :-)
    [partition(Partition)]
 end
-
