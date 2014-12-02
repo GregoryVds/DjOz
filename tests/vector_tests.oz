@@ -3,11 +3,26 @@
 local
    CWD      = {Property.condGet 'testcwd' '/Users/Greg/Desktop/Projet2014/'}
    [Projet] = {Link [CWD#'Projet2014_mozart2.ozf']}
-   Note     = \insert /Users/Greg/Desktop/Projet2014/code/note.oz
+   Note     = \insert /Users/Greg/Desktop/Projet2014/src/note.oz
    Test     = \insert /Users/Greg/Desktop/Projet2014/lib/test.oz
 
+   \insert /Users/Greg/Desktop/Projet2014/src/vector.oz
+
+   % RepeatTimes
+   {Test.assertEqual Repeat [nil 2] nil}
+   {Test.assertEqual Repeat [[0.1 0.2 0.3] 0] nil}
+   {Test.assertEqual Repeat [[0.1 0.2 0.3] 1] [0.1 0.2 0.3]}
+   {Test.assertEqual Repeat [[0.1 0.2 0.3] 2] [0.1 0.2 0.3 0.1 0.2 0.3]}
+   {Test.assertEqual Repeat [[0.1 0.2 0.3] 3] [0.1 0.2 0.3 0.1 0.2 0.3 0.1 0.2 0.3]}
+
+   % RepeatUpToElementsCount
+   {Test.assertEqual RepeatUpToElementsCount [[0.1 0.2 0.3] 0] nil}
+   {Test.assertEqual RepeatUpToElementsCount [nil 3] nil}
+   {Test.assertEqual RepeatUpToElementsCount [[0.1 0.2 0.3] 1] [0.1]}
+   {Test.assertEqual RepeatUpToElementsCount [[0.1 0.2 0.3] 3] [0.1 0.2 0.3]}
+   {Test.assertEqual RepeatUpToElementsCount [[0.1 0.2 0.3] 4] [0.1 0.2 0.3 0.1]}
+   {Test.assertEqual RepeatUpToElementsCount [[0.1 0.2 0.3] 5] [0.1 0.2 0.3 0.1 0.2]}
    
-   \insert /Users/Greg/Desktop/Projet2014/code/vector.oz
    /*
    % HauteurToFrequency
    {Test.assertEqual HauteurToFrequency 0  440.0}
@@ -24,21 +39,6 @@ local
       {Test.assertEqual Length [Vector2] 220}
       {Test.assertEqual Nth [Vector2 10] 0.449393}
    end
-
-   % RepeatTimes
-   {Test.assertEqual Repeat [nil 2] nil}
-   {Test.assertEqual Repeat [[0.1 0.2 0.3] 0] nil}
-   {Test.assertEqual Repeat [[0.1 0.2 0.3] 1] [0.1 0.2 0.3]}
-   {Test.assertEqual Repeat [[0.1 0.2 0.3] 2] [0.1 0.2 0.3 0.1 0.2 0.3]}
-   {Test.assertEqual Repeat [[0.1 0.2 0.3] 3] [0.1 0.2 0.3 0.1 0.2 0.3 0.1 0.2 0.3]}
-
-   % RepeatUpToElementsCount
-   {Test.assertEqual RepeatUpToElementsCount [[0.1 0.2 0.3] 0] nil}
-   {Test.assertEqual RepeatUpToElementsCount [nil 3] nil}
-   {Test.assertEqual RepeatUpToElementsCount [[0.1 0.2 0.3] 1] [0.1]}
-   {Test.assertEqual RepeatUpToElementsCount [[0.1 0.2 0.3] 3] [0.1 0.2 0.3]}
-   {Test.assertEqual RepeatUpToElementsCount [[0.1 0.2 0.3] 4] [0.1 0.2 0.3 0.1]}
-   {Test.assertEqual RepeatUpToElementsCount [[0.1 0.2 0.3] 5] [0.1 0.2 0.3 0.1 0.2]}
 
    % Repeter
    {Test.assertEqual RepeatUpToDuration [nil 1.0 44100] nil}

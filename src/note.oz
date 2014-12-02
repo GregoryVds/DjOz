@@ -1,6 +1,13 @@
+% Expose 3 fonctions related to musical notes:
+% - noteToEchantillon: convert a note to an echantillon
+% - hauteur: count the number of half-steps between a note and a4
+% - buildFromHauteur: convert a hauteur back to a note in extended notation
+
 \ifndef TestNote
 local
 \endif
+   Utilities = \insert /Users/Greg/Desktop/Projet2014/lib/utilities.oz
+   
    NotesList = [n(n:a a:none) n(n:a a:'#')  n(n:b a:none) n(n:c a:none) n(n:c a:'#')  n(n:d a:none)
 		n(n:d a:'#')  n(n:e a:none) n(n:f a:none) n(n:f a:'#')  n(n:g a:none) n(n:g a:'#')]
    NotesListLength = {Length NotesList}
@@ -27,19 +34,19 @@ local
    % Notes in order are: c c# d d# e f f# g g# a a# b
    % Arg: ExtendedNote - a note in extended notation (but not "silence")
    % Return: a distance as integer ranging from -9 to +2 included
-   % Complexity: O(1)
+   % Complexity: O(1) since NotesList length is bound to 12
    fun {DistanceFromA ExtendedNote}
-      DistanceInList = {PositionInList n(n:ExtendedNote.nom a:ExtendedNote.alteration) NotesList}
+      DistanceInList = {Utilities.positionInList n(n:ExtendedNote.nom a:ExtendedNote.alteration) NotesList}
    in
       if DistanceInList > 2 then ~(NotesListLength - DistanceInList) else DistanceInList end
    end
    
 
-   % Count the number of half-steps of note from note a4
-   % halfs_steps = note_distance_from_A + octave_distance_to_4 * 12
+   % Count the number of half-steps between a note and a4
+   % halfs_steps = DistanceFromA + octave_distance_to_4 * 12
    % Arg: Note - a note in short notation (a, b3, b#4, silence)
-   % Return: half-steps from a4 as positive or negative integer.
-   % If note "silence" was passed as argument, returns silence.
+   % Return: Half-steps from a4 as positive or negative integer.
+   %         If note "silence" was passed as argument, returns silence.
    % Complexity: O(1)
    fun {Hauteur Note}
       ExtendedNote NoteDistance OctaveDistance
@@ -48,7 +55,7 @@ local
       else
 	 ExtendedNote   = {ExtendNote Note}
 	 NoteDistance   = {DistanceFromA ExtendedNote}
-	 OctaveDistance = (ExtendedNote.octave - 4) * 12      
+	 OctaveDistance = (ExtendedNote.octave - 4) * NotesListLength      
 	 OctaveDistance+NoteDistance
       end
    end
@@ -56,7 +63,8 @@ local
    
    % Convert a note to an echantillon
    % Arg: Note - a note in short notation (a, b3, b#4, silence)
-   % Return: an enchantillon of the form echantillon(hauteur:73 duree:1.0 instrument:none)
+   %      Instrument - an instrument as atom (woody, drums)
+   % Return: an enchantillon of the form echantillon(hauteur:73 duree:1.0 instrument:woody)
    % Complexity: O(1)
    fun {NoteToEchantillon Note Instrument}
       case Note
@@ -65,7 +73,12 @@ local
       end
    end
 
-   fun {HauteurToNote Hauteur}
+
+   % Convert a hauteur back to a note in extended notation
+   % Arg: Hauteur - note distance from a4 as positive or negative integer
+   % Returns: note in extended notation like note(name:a octave:3 alteration:none)
+   % Complexity: O(1) since NotesList length is bound to 12
+   fun {BuildFromHauteur Hauteur}
       Octave = 4 + (Hauteur div NotesListLength)
       NoteDistance = Hauteur mod NotesListLength
       NotePosition
@@ -74,10 +87,11 @@ local
       NotePosition = if (NoteDistance < 0) then NotesListLength+NoteDistance+1 else NoteDistance+1 end
       N = {Nth NotesList NotePosition} 
       note(nom:N.n octave:Octave alteration:N.a)      
-   end    
+   end
+   
    
 \ifndef TestNote
 in
-   'export'(noteToEchantillon:NoteToEchantillon hauteur:Hauteur hauteurToNote:HauteurToNote)
+   'export'(noteToEchantillon:NoteToEchantillon hauteur:Hauteur buildFromHauteur:BuildFromHauteur)
 end
 \endif

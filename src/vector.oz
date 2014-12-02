@@ -1,10 +1,19 @@
+% Expose 9 fonctions that apply filters on musical vectors
+% A musical vector is list of floats >= -1 and <= 1
+% - repeat: repeat a musical vector X times
+% - repeatUpToDuration: repeat a musical vector up to a fixed duration and truncate the rest
+% - clip: clip a musical vector so that all its values are comprised in the specified interval
+
 \ifndef TestVector
 local
 \endif
+
    
-   % Repeats a vector X times
-   % Arg: a vector and an integer
-   % Return: the vector passed in argument repeated X times
+   % Repeat a musical vector X times
+   % Arg: Vector - a musical vector
+   %      Times - an integer (>=0) the gives the final number of repetitions.
+   % Return: the vector passed in argument repeated X times. If X=0 then return nil.
+   % Complexity: O(n*m) where n is the length of the vector and m the number of repetitions
    fun {Repeat Vector Times}
       fun {RecRepeat Counter Acc}
 	 if (Counter==0) then Acc else {RecRepeat Counter-1 {Append Vector Acc}} end
@@ -14,15 +23,16 @@ local
    end
 
    
-   % Repeats a vector up to max X elements
-   % Arg: a vector and the max number of elements to be contained (natural)
+   % Repeat a musical vector untill it reaches a maximum number of elements and truncate the rest
+   % Arg: Vector - a musical vector
+   %      ElementsCount - maximum number of elements as integer (>=0)
    % Return: the repeated vector
+   % Complexity: O(n) where n is ElementsCount
    fun {RepeatUpToElementsCount Vector ElementsCount}
       BasicRepeats Remaining
       VectorSize = {Length Vector}
    in
-      if VectorSize==0 then
-	 nil
+      if VectorSize==0 then nil
       else
 	 BasicRepeats = ElementsCount div VectorSize
 	 Remaining    = ElementsCount mod VectorSize
@@ -31,17 +41,23 @@ local
    end
 
    
-   % Repeats a vector X times or up to a duration
-   % Arg: a vector, the factor which is a positive or integer >=0, and the sampling rate (natural)
-   % Return: a repeated vector
+   % Repeat a musical vector up to a fixed duration and truncate the rest
+   % Arg: Vector - a musical vector
+   %      Duration - the final duration of the vector as float (>=0)
+   %      SamplingRate - the number of values per second as integer (>=0)
+   % Return: the repeated vector lasting Duration seconds
+   % Complexity: O(n) where n is Duration*SamplingRate
    fun {RepeatUpToDuration Vector Duration SamplingRate}
       {RepeatUpToElementsCount Vector {FloatToInt Duration*{IntToFloat SamplingRate}}}
    end
 
 
-   % Clip values in the vector so that all values are >= Low and <= High
-   % Arg: a vector, the low bound as float, the high bound as float.
-   % Return: a clipped vector
+   % Clip a musical vector so that all its values are comprised in the specified interval
+   % Arg: Vector - a musical vector
+   %      Low - the lower bound as float (>= -1 & <= 1)
+   %      High - the upper bound as float (>= -1 & <= 1)
+   % Return: the clipped vector where values outside the interval are rounded to the closest bound
+   % Complexity: O(n) where n is the vector length
    fun {Clip Vector Low High}
       fun {ClipElement Element}
 	 {Max {Min Element High} Low}
@@ -53,6 +69,7 @@ local
 	 {Map Vector ClipElement}
       end
    end
+
    
    fun {Fondu Vector Ouverture Fermeture SamplingRate}
       VectorLength = {Length Vector}
@@ -202,7 +219,7 @@ local
    end
 
    fun {VectorFromInstrument Instrument Hauteur Duree SamplingRate}
-      InstrumentVector = {Projet.readFile {FilePath {Note.hauteurToNote Hauteur} Instrument}}
+      InstrumentVector = {Projet.readFile {FilePath {Note.buildFromHauteur Hauteur} Instrument}}
    in
       {SmoothenVector {RepeatUpToDuration InstrumentVector Duree SamplingRate} Duree SamplingRate}      
    end

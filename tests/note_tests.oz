@@ -2,7 +2,7 @@
 
 local
    Test = \insert /Users/Greg/Desktop/Projet2014/lib/test.oz
-   \insert /Users/Greg/Desktop/Projet2014/code/note.oz
+   \insert /Users/Greg/Desktop/Projet2014/src/note.oz
 
    % ExtendNote
    {Test.assertEqual ExtendNote a3      note(nom:a octave:3 alteration:none)}
@@ -34,11 +34,11 @@ local
    {Test.assertEqual NoteToEchantillon [silence none] silence(duree:1.0)}
 
    % HauteurToNote
-   {Test.assertEqual HauteurToNote   2 note(nom:b octave:4 alteration:none)}
-   {Test.assertEqual HauteurToNote   0 note(nom:a octave:4 alteration:none)}
-   {Test.assertEqual HauteurToNote  ~1 note(nom:g octave:4 alteration:'#')}
-   {Test.assertEqual HauteurToNote  13 note(nom:a octave:5 alteration:'#')}
-   {Test.assertEqual HauteurToNote ~25 note(nom:g octave:2 alteration:'#')}
+   {Test.assertEqual BuildFromHauteur   2 note(nom:b octave:4 alteration:none)}
+   {Test.assertEqual BuildFromHauteur   0 note(nom:a octave:4 alteration:none)}
+   {Test.assertEqual BuildFromHauteur  ~1 note(nom:g octave:4 alteration:'#')}
+   {Test.assertEqual BuildFromHauteur  13 note(nom:a octave:5 alteration:'#')}
+   {Test.assertEqual BuildFromHauteur ~25 note(nom:g octave:2 alteration:'#')}
 in
    {Browse doneTestingNote}
 end

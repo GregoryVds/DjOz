@@ -11,9 +11,9 @@ local
 \endif
    CWD      = {Property.condGet 'testcwd' '/Users/Greg/Desktop/Projet2014/'}
    [Projet] = {Link [CWD#'Projet2014_mozart2.ozf']}
-   Note     = \insert /Users/Greg/Desktop/Projet2014/code/note.oz
-   Voice    = \insert /Users/Greg/Desktop/Projet2014/code/voice.oz
-   Vector   = \insert /Users/Greg/Desktop/Projet2014/code/vector.oz
+   Note     = \insert /Users/Greg/Desktop/Projet2014/src/note.oz
+   Voice    = \insert /Users/Greg/Desktop/Projet2014/src/voice.oz
+   Vector   = \insert /Users/Greg/Desktop/Projet2014/src/vector.oz
 \ifndef TestCode
 in
 \endif
