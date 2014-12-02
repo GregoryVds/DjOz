@@ -1,8 +1,8 @@
-\define TestUtilities
+\define TestListHelpers
 
 local
    Test = \insert /Users/Greg/Desktop/Projet2014/lib/test.oz
-   \insert /Users/Greg/Desktop/Projet2014/lib/utilities.oz
+   \insert /Users/Greg/Desktop/Projet2014/lib/list_helpers.oz
 
    % Position in list
    {Test.assertEqual PositionInList [a [a b c]] 0}
@@ -25,6 +25,6 @@ local
    {Test.assertEqual RepeatUpToElementsCount [[0.1 0.2 0.3] 5] [0.1 0.2 0.3 0.1 0.2]}
    
 in
-   {Browse doneTestingUtilities}
+   {Browse doneTestingListHelpers}
 end
-\undef TestUtilities
+\undef TestListHelpers

@@ -21,7 +21,7 @@ local
    % Return: the vector passed in argument repeated X times. If X=0 then return nil.
    % Complexity: O(VectorLength*Times)
    fun {Repeat Vector Times}
-      {Utilities.repeat Vector Times}
+      {ListHelpers.repeat Vector Times}
    end
    
    
@@ -32,7 +32,7 @@ local
    % Return: the repeated vector lasting Duration seconds
    % Complexity: O(Duration*SamplingRate)
    fun {RepeatUpToDuration Vector Duration SamplingRate}
-      {Utilities.repeatUpToElementsCount Vector {FloatToInt Duration*{IntToFloat SamplingRate}}}
+      {ListHelpers.repeatUpToElementsCount Vector {FloatToInt Duration*{IntToFloat SamplingRate}}}
    end
 
 

@@ -1,13 +1,13 @@
 \define TestVector
 
 local
-   CWD       = {Property.condGet 'testcwd' '/Users/Greg/Desktop/Projet2014/'}
-   [Projet]  = {Link [CWD#'Projet2014_mozart2.ozf']}
-   Note      = \insert /Users/Greg/Desktop/Projet2014/src/note.oz
-   Utilities = \insert /Users/Greg/Desktop/Projet2014/lib/utilities.oz
-   Test      = \insert /Users/Greg/Desktop/Projet2014/lib/test.oz
-
+   CWD         = {Property.condGet 'testcwd' '/Users/Greg/Desktop/Projet2014/'}
+   [Projet]    = {Link [CWD#'Projet2014_mozart2.ozf']}
+   Note        = \insert /Users/Greg/Desktop/Projet2014/src/note.oz
+   ListHelpers = \insert /Users/Greg/Desktop/Projet2014/lib/list_helpers.oz
+   Test        = \insert /Users/Greg/Desktop/Projet2014/lib/test.oz
    \insert /Users/Greg/Desktop/Projet2014/src/vector.oz
+   
    % Repeat
    {Test.assertEqual Repeat [[0.1 0.2 0.3] 1] [0.1 0.2 0.3]}
    {Test.assertEqual Repeat [[0.1 0.2 0.3] 2] [0.1 0.2 0.3 0.1 0.2 0.3]}
@@ -50,7 +50,6 @@ local
    {Test.assertEqual Merge [[0.4#nil 0.6#[0.5 ~0.2 ~0.3]]] [0.3 ~0.12 ~0.18]}
    {Test.assertEqual Merge [[0.4#nil 0.6#nil]] nil}
    {Test.assertEqual Merge [nil] nil}
-
 
    % FonduEnchaine
    {Test.assertEqual FonduEnchaine [[0.5 0.5 0.5] [0.5 0.5 0.5] 3.0 1] [0.5 0.5 0.5]}

@@ -1,8 +1,8 @@
 % Expose 5 fonctions that apply transformations on musical voices (flat list of echantillons)
-% - muet: mute a voice by replacing all enchantillons by silences
-% - etirer: stretch a voice (final duration is original duration multiplied by strech factor)
-% - duree: fix the total duration of a voice while preserving the relative duration of each echantillon
-% - bourdon: set the hauteur of each enchantillons in a voice to a fixed value
+% - muet:      mute a voice by replacing all enchantillons by silences
+% - etirer:    stretch a voice (final duration is original duration multiplied by strech factor)
+% - duree:     fix the total duration of a voice while preserving the relative duration of each echantillon
+% - bourdon:   set the hauteur of each enchantillons in a voice to a fixed value
 % - transpore: shift the hauteur of all echantillons in a voice by a number of halfsteps
 
 \ifndef TestVoice

@@ -3,7 +3,7 @@
 % repeat:                  repeat a list X times
 % repeatUpToElementsCount: repeat a list until it reaches a maximum number of elements and truncate the rest
 
-\ifndef TestUtilities
+\ifndef TestListHelpers
 local
 \endif
 
@@ -57,7 +57,7 @@ local
    end
 
    
-\ifndef TestUtilities
+\ifndef TestListHelpers
 in
    'export'(positionInList:PositionInList repeat:Repeat repeatUpToElementsCount:RepeatUpToElementsCount)
 end

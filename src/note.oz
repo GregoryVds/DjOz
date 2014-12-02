@@ -36,7 +36,7 @@ local
    % Return: a distance as integer ranging from -9 to +2 included
    % Complexity: O(1) since NotesList length is bound to 12
    fun {DistanceFromA ExtendedNote}
-      DistanceInList = {Utilities.positionInList n(n:ExtendedNote.nom a:ExtendedNote.alteration) NotesList}
+      DistanceInList = {ListHelpers.positionInList n(n:ExtendedNote.nom a:ExtendedNote.alteration) NotesList}
    in
       if DistanceInList > 2 then ~(NotesListLength - DistanceInList) else DistanceInList end
    end

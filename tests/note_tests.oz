@@ -1,8 +1,8 @@
 \define TestNote
 
 local
-   Test = \insert /Users/Greg/Desktop/Projet2014/lib/test.oz
-   Utilities = \insert /Users/Greg/Desktop/Projet2014/lib/utilities.oz
+   Test        = \insert /Users/Greg/Desktop/Projet2014/lib/test.oz
+   ListHelpers = \insert /Users/Greg/Desktop/Projet2014/lib/list_helpers.oz
    \insert /Users/Greg/Desktop/Projet2014/src/note.oz
 
    % ExtendNote

@@ -1,20 +1,13 @@
-% {Projet.run Interprete Mix Music 'out.wav'} = ok OR error(...) 
-% {Projet.readFile FileName} = AudioVector OR error(...)
-% {Projet.writeFile FileName AudioVector} = ok OR error(...)
-% {Projet.load 'music_file.dj.oz'} = La valeur oz contenue dans le fichier chargé (normalement une <musique>).
-% Projet.hz = 44100, la fréquence d'échantilonnage (nombre de données par seconde)
-
 \ifndef TestCode
 local
-   Interprete
-   Mix
+   Interprete Mix
 \endif
-   CWD       = {Property.condGet 'testcwd' '/Users/Greg/Desktop/Projet2014/'}
-   [Projet]  = {Link [CWD#'Projet2014_mozart2.ozf']}
-   Utilities = \insert /Users/Greg/Desktop/Projet2014/lib/utilities.oz
-   Note      = \insert /Users/Greg/Desktop/Projet2014/src/note.oz
-   Voice     = \insert /Users/Greg/Desktop/Projet2014/src/voice.oz
-   Vector    = \insert /Users/Greg/Desktop/Projet2014/src/vector.oz
+   CWD         = {Property.condGet 'testcwd' '/Users/Greg/Desktop/Projet2014/'}
+   [Projet]    = {Link [CWD#'Projet2014_mozart2.ozf']}
+   ListHelpers = \insert /Users/Greg/Desktop/Projet2014/lib/list_helpers.oz
+   Note        = \insert /Users/Greg/Desktop/Projet2014/src/note.oz
+   Voice       = \insert /Users/Greg/Desktop/Projet2014/src/voice.oz
+   Vector      = \insert /Users/Greg/Desktop/Projet2014/src/vector.oz
    
 \ifndef TestCode
 in
@@ -71,12 +64,6 @@ in
       {Flatten {Map Music MixMorceau}}
    end
 
-   % Votre code DOIT appeler Projet.run UNE SEULE fois.  Lors de cet appel,
-   % vous devez mixer une musique qui démontre les fonctionalités de votre
-   % programme.
-   %
-   % Si votre code devait ne pas passer nos tests, cet exemple serait le
-   % seul qui ateste de la validité de votre implémentation.
    {Browse {Projet.run Mix Interprete {Projet.load CWD#'example.dj.oz'} CWD#'out.wav'}}
    
 \ifndef TestCode
