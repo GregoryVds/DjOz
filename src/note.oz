@@ -1,12 +1,11 @@
 % Expose 3 fonctions related to musical notes:
 % - noteToEchantillon: convert a note to an echantillon
-% - hauteur: count the number of half-steps between a note and a4
-% - buildFromHauteur: convert a hauteur back to a note in extended notation
+% - hauteur:           count the number of half-steps between a note and a4
+% - buildFromHauteur:  convert a hauteur back to a note in extended notation
 
 \ifndef TestNote
 local
 \endif
-   Utilities = \insert /Users/Greg/Desktop/Projet2014/lib/utilities.oz
    
    NotesList = [n(n:a a:none) n(n:a a:'#')  n(n:b a:none) n(n:c a:none) n(n:c a:'#')  n(n:d a:none)
 		n(n:d a:'#')  n(n:e a:none) n(n:f a:none) n(n:f a:'#')  n(n:g a:none) n(n:g a:'#')]

@@ -9,11 +9,13 @@ local
    Interprete
    Mix
 \endif
-   CWD      = {Property.condGet 'testcwd' '/Users/Greg/Desktop/Projet2014/'}
-   [Projet] = {Link [CWD#'Projet2014_mozart2.ozf']}
-   Note     = \insert /Users/Greg/Desktop/Projet2014/src/note.oz
-   Voice    = \insert /Users/Greg/Desktop/Projet2014/src/voice.oz
-   Vector   = \insert /Users/Greg/Desktop/Projet2014/src/vector.oz
+   CWD       = {Property.condGet 'testcwd' '/Users/Greg/Desktop/Projet2014/'}
+   [Projet]  = {Link [CWD#'Projet2014_mozart2.ozf']}
+   Utilities = \insert /Users/Greg/Desktop/Projet2014/lib/utilities.oz
+   Note      = \insert /Users/Greg/Desktop/Projet2014/src/note.oz
+   Voice     = \insert /Users/Greg/Desktop/Projet2014/src/voice.oz
+   Vector    = \insert /Users/Greg/Desktop/Projet2014/src/vector.oz
+   
 \ifndef TestCode
 in
 \endif

@@ -1,9 +1,13 @@
 % Expose 9 fonctions that apply filters on musical vectors
 % A musical vector is list of floats >= -1 and <= 1
-% - repeat: repeat a musical vector X times
+% - repeat:             repeat a musical vector X times
 % - repeatUpToDuration: repeat a musical vector up to a fixed duration and truncate the rest
-% - clip: clip a musical vector so that all its values are comprised in the specified interval
-
+% - clip:               clip a musical vector so that all its values are comprised in the specified interval
+% - fondu:              fade in the start and fade out the end of a musical vector
+% - merge:              merge multiple musical vectors together by computing the weigthed sum of the vectors to merge (where the weight is the intensity)
+% - fonduEnchaine:      concatenate 2 musical vectors together and fade out the end of the first one while fading in
+%                       the start of the second one for a smooth transition over a specified duration
+% - couper:             returns all the values in a time interval in a musical vector. If the time interval extends beyond the vector it return 0.0's on that portion of the interval
 \ifndef TestVector
 local
 \endif
@@ -15,31 +19,9 @@ local
    % Return: the vector passed in argument repeated X times. If X=0 then return nil.
    % Complexity: O(n*m) where n is the length of the vector and m the number of repetitions
    fun {Repeat Vector Times}
-      fun {RecRepeat Counter Acc}
-	 if (Counter==0) then Acc else {RecRepeat Counter-1 {Append Vector Acc}} end
-      end
-   in
-      {RecRepeat Times nil}
+      {Utilities.repeat Vector Times}
    end
-
    
-   % Repeat a musical vector untill it reaches a maximum number of elements and truncate the rest
-   % Arg: Vector - a musical vector
-   %      ElementsCount - maximum number of elements as integer (>=0)
-   % Return: the repeated vector
-   % Complexity: O(n) where n is ElementsCount
-   fun {RepeatUpToElementsCount Vector ElementsCount}
-      BasicRepeats Remaining
-      VectorSize = {Length Vector}
-   in
-      if VectorSize==0 then nil
-      else
-	 BasicRepeats = ElementsCount div VectorSize
-	 Remaining    = ElementsCount mod VectorSize
-	 {Flatten [{Repeat Vector BasicRepeats} {List.take Vector Remaining}]}
-      end
-   end
-
    
    % Repeat a musical vector up to a fixed duration and truncate the rest
    % Arg: Vector - a musical vector
@@ -48,7 +30,7 @@ local
    % Return: the repeated vector lasting Duration seconds
    % Complexity: O(n) where n is Duration*SamplingRate
    fun {RepeatUpToDuration Vector Duration SamplingRate}
-      {RepeatUpToElementsCount Vector {FloatToInt Duration*{IntToFloat SamplingRate}}}
+      {Utilities.repeatUpToElementsCount Vector {FloatToInt Duration*{IntToFloat SamplingRate}}}
    end
 
 
@@ -70,21 +52,27 @@ local
       end
    end
 
-   
-   fun {Fondu Vector Ouverture Fermeture SamplingRate}
-      VectorLength = {Length Vector}
-      OuvertureElementsCount = {FloatToInt Ouverture*{IntToFloat SamplingRate}}
-      FermetureElementsCount = {FloatToInt Fermeture*{IntToFloat SamplingRate}}      
+
+   % Fade in the start and fade out the end of a musical vector
+   % Linearly increase the intensity of its start by multiplying values from 0 to 1 on the specified interval
+   % Linearly decreasing the intensity of its end by multiplying values from 1 to 0 on the specified interval
+   % Arg: Vector - a musical vector
+   %      Start - interval on which to fade the vector at the start as float (>= 0)
+   %      End - interval on which to fade the vector at the end as float (>= 0)
+   %      SamplingRate - the number of values per second as integer (>=0)
+   % Return: a faded musical vector
+   % Complexity: O(n) where n is the vector length
+   fun {Fondu Vector Start End SamplingRate}
+      VectorLength       = {Length Vector}
+      StartElementsCount = {FloatToInt Start*{IntToFloat SamplingRate}}
+      EndElementsCount   = {FloatToInt End*{IntToFloat SamplingRate}}      
       fun {RecFondu Vector PositionFromHead PositionFromTail}
 	 case Vector
 	 of nil then nil
 	 [] H|T then Factor in
-	    Factor = if (PositionFromHead =< OuvertureElementsCount) then
-			({IntToFloat PositionFromHead}-1.0)/({IntToFloat OuvertureElementsCount}-1.0)
-		     elseif (PositionFromTail =< FermetureElementsCount) then
-			({IntToFloat PositionFromTail}-1.0)/({IntToFloat FermetureElementsCount}-1.0)
-		     else
-			1.0
+	    Factor = if (PositionFromHead =< StartElementsCount)   then ({IntToFloat PositionFromHead}-1.0)/({IntToFloat StartElementsCount}-1.0)
+		     elseif (PositionFromTail =< EndElementsCount) then	({IntToFloat PositionFromTail}-1.0)/({IntToFloat EndElementsCount}-1.0)
+		     else 1.0
 		     end
 	    (Factor*H) | {RecFondu T (PositionFromHead+1) (PositionFromTail-1)}
 	 end          
@@ -93,10 +81,23 @@ local
       {RecFondu Vector 1 VectorLength}
    end
 
+
+   % Multiply each element in a musical vector by a factor
+   % Arg: Vector - a musical vector
+   %      Factor - float
+   % Return: the vector where each element is multiplied by the factor
+   % Complexity: O(n) where n is the vector length
    fun {Multiply Vector Factor}
       {Map Vector fun {$ Elem} Elem * Factor end } 
    end
+
    
+   % Add 2 musical vectors together
+   % Arg: Vector1 - a musical vector to be added
+   %      Vector2 - a musical vector to be added
+   % Return: a single vector which is the addition of Vector1 and Vector2.
+   %         If one vector is longer than the other, then nothing is added at the end of the longest.
+   % Complexity: O(n) where n is the shortest vector length
    fun {Add Vector1 Vector2}
       Length1 = {Length Vector1}
       Length2 = {Length Vector2}
@@ -107,7 +108,7 @@ local
 	 of nil then nil
 	 [] H|T then
 	    case ShortestV
-	    of nil   then H | {RecAdd T nil}  
+	    of nil   then LongestV
 	    [] H2|T2 then (H+H2) | {RecAdd T T2}  
 	    end
 	 end  	    
@@ -116,6 +117,11 @@ local
       {RecAdd Longest Shortest}
    end
    
+
+   % Merge multiple musical vectors together by computing the weigthed sum of the vectors to merge (where the weight is the intensity)
+   % Arg: VectorsToMerge - a list a pairs with Intensity#MusicalVector where the sum the of intensities (floats) <= 1
+   % Return: a single musical vector
+   % Complexity: O(n-1*m) where n is the number of vector to merge and m is roughly the minimum of the vectors to merge
    fun {Merge VectorsToMerge}
       fun {RecMerge VectorsToMerge Acc}
 	 case VectorsToMerge
@@ -127,7 +133,15 @@ local
    in
       {RecMerge VectorsToMerge nil}
    end
-   
+
+
+   % Concatenate 2 musical vectors together and fade out the end of the first one while fading in the start of the second one for a smooth transition over a specified duration
+   % Arg: Vector1 - first musical vector to concatenate in the final vector
+   %      Vector2 - second musical vector to concatenate in the final vector
+   %      Duration - duration of the fade in/fade out transition between the 2 vectors
+   %      SamplingRate - the number of values per second as integer (>=0)
+   % Return: a single musical vector
+   % Complexity: O(n) where n is roughly the average length of the 2 vectors.
    fun {FonduEnchaine Vector1 Vector2 Duration SamplingRate}
       V1Start V1Fondu V2Fondu V2End 
       FonduElements = {FloatToInt Duration*{IntToFloat SamplingRate}}
@@ -138,32 +152,34 @@ local
       {Append {Append V1Start Mix} V2End}
    end
 
+
+   % Returns all values in a time interval in a musical vector. If the time interval extends beyond the vector it return 0.0's on that portion of the interval.
+   % Arg: Vector - the musical vector to slice from
+   %      Start - the start of the time interval relative the start of the vector
+   %      End - the end of the time interval relative the end of the vector
+   %      SamplingRate - the number of values per second as integer (>=0)
+   % Return: a single musical vector sliced out of the original one.
+   % Complexity: 
    fun {Couper Vector Start End SamplingRate}
       SamplingFloat = {IntToFloat SamplingRate}
       IntervalStart = {FloatToInt Start*SamplingFloat}
       IntervalEnd   = {FloatToInt End*SamplingFloat}
       VectorLength  = {Length Vector}
-      fun {Slice Vector Position Acc}
-	 if (Position == IntervalEnd) then
-	    {Reverse Acc}
-	 elseif (Position < 0) then
-	    {Slice Vector Position+1 (0.0|Acc)}
-	 elseif ({And Position>=VectorLength Position>=IntervalStart}) then 
-	    {Slice Vector Position+1 (0.0|Acc)}
+      fun {CouperRec Vector Position Acc}
+	 if (Position == IntervalEnd)                                  then {Reverse Acc}
+	 elseif (Position < 0)                                         then {CouperRec Vector Position+1 (0.0|Acc)}
+	 elseif ({And Position>=VectorLength Position>=IntervalStart}) then {CouperRec Vector Position+1 (0.0|Acc)}
 	 else
 	    if (Position < IntervalStart) then V in
-	       V = case Vector
-		   of nil then nil
-		   [] _|T then T
-		   end	  
-	       {Slice V Position+1 Acc}
+	       V = case Vector of nil then nil [] _|T then T end	  
+	       {CouperRec V Position+1 Acc}
 	    else
-	       {Slice Vector.2 Position+1 (Vector.1|Acc)}
+	       {CouperRec Vector.2 Position+1 (Vector.1|Acc)}
 	    end 
 	 end		 
       end 
    in
-      {Slice Vector {Min IntervalStart 0} nil}
+      {CouperRec Vector {Min IntervalStart 0} nil}
    end
 
 

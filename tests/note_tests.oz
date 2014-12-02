@@ -2,6 +2,7 @@
 
 local
    Test = \insert /Users/Greg/Desktop/Projet2014/lib/test.oz
+   Utilities = \insert /Users/Greg/Desktop/Projet2014/lib/utilities.oz
    \insert /Users/Greg/Desktop/Projet2014/src/note.oz
 
    % ExtendNote

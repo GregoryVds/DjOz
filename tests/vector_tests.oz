@@ -1,27 +1,63 @@
 \define TestVector
 
 local
-   CWD      = {Property.condGet 'testcwd' '/Users/Greg/Desktop/Projet2014/'}
-   [Projet] = {Link [CWD#'Projet2014_mozart2.ozf']}
-   Note     = \insert /Users/Greg/Desktop/Projet2014/src/note.oz
-   Test     = \insert /Users/Greg/Desktop/Projet2014/lib/test.oz
+   CWD       = {Property.condGet 'testcwd' '/Users/Greg/Desktop/Projet2014/'}
+   [Projet]  = {Link [CWD#'Projet2014_mozart2.ozf']}
+   Note      = \insert /Users/Greg/Desktop/Projet2014/src/note.oz
+   Utilities = \insert /Users/Greg/Desktop/Projet2014/lib/utilities.oz
+   Test      = \insert /Users/Greg/Desktop/Projet2014/lib/test.oz
 
    \insert /Users/Greg/Desktop/Projet2014/src/vector.oz
-
-   % RepeatTimes
-   {Test.assertEqual Repeat [nil 2] nil}
-   {Test.assertEqual Repeat [[0.1 0.2 0.3] 0] nil}
+   % Repeat
    {Test.assertEqual Repeat [[0.1 0.2 0.3] 1] [0.1 0.2 0.3]}
    {Test.assertEqual Repeat [[0.1 0.2 0.3] 2] [0.1 0.2 0.3 0.1 0.2 0.3]}
-   {Test.assertEqual Repeat [[0.1 0.2 0.3] 3] [0.1 0.2 0.3 0.1 0.2 0.3 0.1 0.2 0.3]}
+   
+   % Clip
+   {Test.assertEqual Clip [nil 0.2 0.3] nil}
+   {Test.assertEqual Clip [[0.1 0.2 0.3] 0.15 0.25] [0.15 0.2 0.25]}
+   {Test.assertEqual Clip [[0.1 0.2 0.3] 0.25 0.25] [0.25 0.25 0.25]}
+   {Test.assertEqual Clip [[0.1 0.2 0.3] 0.05 0.50] [0.1 0.2 0.3]}
+  
+   % Fondu
+   {Test.assertEqual Fondu [[0.1 0.2 0.3] 0.0 0.0 44100] [0.1 0.2 0.3]}
+   {Test.assertEqual Fondu [[0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1] 0.5 0.5 10] [0.0 0.025 0.05 0.075 0.1 0.1 0.075 0.05 0.025 0.0]}
+   {Test.assertEqual Fondu [[0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1] 0.5 0.0 10] [0.0 0.025 0.05 0.075 0.1 0.1 0.1 0.1 0.1 0.1]}
+   {Test.assertEqual Fondu [[0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1] 0.0 0.5 10] [0.1 0.1 0.1 0.1 0.1 0.1 0.075 0.05 0.025 0.0]}
 
-   % RepeatUpToElementsCount
-   {Test.assertEqual RepeatUpToElementsCount [[0.1 0.2 0.3] 0] nil}
-   {Test.assertEqual RepeatUpToElementsCount [nil 3] nil}
-   {Test.assertEqual RepeatUpToElementsCount [[0.1 0.2 0.3] 1] [0.1]}
-   {Test.assertEqual RepeatUpToElementsCount [[0.1 0.2 0.3] 3] [0.1 0.2 0.3]}
-   {Test.assertEqual RepeatUpToElementsCount [[0.1 0.2 0.3] 4] [0.1 0.2 0.3 0.1]}
-   {Test.assertEqual RepeatUpToElementsCount [[0.1 0.2 0.3] 5] [0.1 0.2 0.3 0.1 0.2]}
+   % Repeter
+   {Test.assertEqual RepeatUpToDuration [nil 1.0 44100] nil}
+   {Test.assertEqual Length [{RepeatUpToDuration [0.1 0.2 0.3] 0.001 44100}] 44}
+   {Test.assertEqual RepeatUpToDuration [[0.1 0.2 0.3] 0.0 44100] nil}
+
+   % Multiply
+   {Test.assertEqual Multiply [[0.2 0.4] 0.5] [0.1 0.2]}
+   {Test.assertEqual Multiply [[~0.2 0.4] 0.5] [~0.1 0.2]}
+
+   % Add
+   {Test.assertEqual Add [[1 2 3] [7 8]] [8 10 3]}
+   {Test.assertEqual Add [[7 8] [1 2 3]] [8 10 3]}
+   {Test.assertEqual Add [[~7 8] [1 ~2 ~3]] [~6 6 ~3]}
+   {Test.assertEqual Add [[1 3] [7 6]] [8 9]}
+   {Test.assertEqual Add [[1 2 3] nil] [1 2 3]}
+   {Test.assertEqual Add [nil [1 2 3]] [1 2 3]}
+   {Test.assertEqual Add [nil nil] nil}
+
+   % Merge
+   {Test.assertEqual Merge [[0.5#[0.1 0.2 0.3] 0.3#[0.1 0.2 0.3] 0.2#[0.1 0.2 0.3]]] [0.1 0.2 0.3]}
+   {Test.assertEqual Merge [[0.4#[0.1 0.2 0.3] 0.4#[0.5 ~0.2 ~0.3] 0.2#[0.7 0.9 ~0.9]]] [0.38 0.18 ~0.18]}
+   {Test.assertEqual Merge [[0.4#[0.1 0.2 0.3] 0.4#[0.5 ~0.2 ~0.3]]] [0.24 0.0 0.0]}
+   {Test.assertEqual Merge [[1.0#[0.1 0.2 0.3]]] [0.1 0.2 0.3]}
+   {Test.assertEqual Merge [[0.4#nil 0.6#[0.5 ~0.2 ~0.3]]] [0.3 ~0.12 ~0.18]}
+   {Test.assertEqual Merge [[0.4#nil 0.6#nil]] nil}
+   {Test.assertEqual Merge [nil] nil}
+
+
+   % FonduEnchaine
+   {Test.assertEqual FonduEnchaine [[0.5 0.5 0.5] [0.5 0.5 0.5] 3.0 1] [0.5 0.5 0.5]}
+   {Test.assertEqual FonduEnchaine [[0.2 0.4 0.6 0.8 0.2 0.7 0.4] [~0.5 ~0.6 0.4 0.2] 3.0 1] [0.2 0.4 0.6 0.8 0.2 0.05 0.4 0.2]}
+   {Test.assertEqual FonduEnchaine [[0.2 0.4 0.6 0.8] [~0.5 ~0.6 0.4 0.2 0.3 ~0.5] 3.0 1] [0.2 0.4 0.0 0.4 0.2 0.3 ~0.5]}
+   {Test.assertEqual FonduEnchaine [nil [0.5 0.5 0.5] 0.0 1] [0.5 0.5 0.5]}
+   {Test.assertEqual FonduEnchaine [[0.5 0.5 0.5] nil 0.0 1] [0.5 0.5 0.5]}
    
    /*
    % HauteurToFrequency
@@ -40,50 +76,10 @@ local
       {Test.assertEqual Nth [Vector2 10] 0.449393}
    end
 
-   % Repeter
-   {Test.assertEqual RepeatUpToDuration [nil 1.0 44100] nil}
-   {Test.assertEqual Length [{RepeatUpToDuration [0.1 0.2 0.3] 0.001 44100}] 44}
-   {Test.assertEqual RepeatUpToDuration [[0.1 0.2 0.3] 0.0 44100] nil}
 
-   % Clip
-   {Test.assertEqual Clip [nil 0.2 0.3] nil}
-   {Test.assertEqual Clip [[0.1 0.2 0.3] 0.15 0.25] [0.15 0.2 0.25]}
-   {Test.assertEqual Clip [[0.1 0.2 0.3] 0.25 0.25] [0.25 0.25 0.25]}
-   {Test.assertEqual Clip [[0.1 0.2 0.3] 0.05 0.50] [0.1 0.2 0.3]}
-  
-   % Fondu
-   {Test.assertEqual Fondu [[0.1 0.2 0.3] 0.0 0.0 44100] [0.1 0.2 0.3]}
-   {Test.assertEqual Fondu [[0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1] 0.5 0.5 10] [0.0 0.025 0.05 0.075 0.1 0.1 0.075 0.05 0.025 0.0]}
-   {Test.assertEqual Fondu [[0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1] 0.5 0.0 10] [0.0 0.025 0.05 0.075 0.1 0.1 0.1 0.1 0.1 0.1]}
-   {Test.assertEqual Fondu [[0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1] 0.0 0.5 10] [0.1 0.1 0.1 0.1 0.1 0.1 0.075 0.05 0.025 0.0]}
 
-   % Multiply
-   {Test.assertEqual Multiply [[0.2 0.4] 0.5] [0.1 0.2]}
-   {Test.assertEqual Multiply [[~0.2 0.4] 0.5] [~0.1 0.2]}
 
-   % Add
-   {Test.assertEqual Add [[1 2 3] [7 8]] [8 10 3]}
-   {Test.assertEqual Add [[7 8] [1 2 3]] [8 10 3]}
-   {Test.assertEqual Add [[~7 8] [1 ~2 ~3]] [~6 6 ~3]}
-   {Test.assertEqual Add [[1 3] [7 6]] [8 9]}
-   {Test.assertEqual Add [[1 2 3] nil] [1 2 3]}
-   {Test.assertEqual Add [nil [1 2 3]] [1 2 3]}
-   {Test.assertEqual Add [nil nil] nil}
 
-   % Merge
-   {Test.assertEqual Merge [[0.5#[0.1 0.2 0.3] 0.3#[0.1 0.2 0.3] 0.2#[0.1 0.2 0.3]]] [0.1 0.2 0.3]}
-   {Test.assertEqual Merge [[0.4#[0.1 0.2 0.3] 0.4#[0.5 ~0.2 ~0.3] 0.2#[0.7 0.9 ~0.9]]] [0.38 0.18 ~0.18]}
-   {Test.assertEqual Merge [[1.0#[0.1 0.2 0.3]]] [0.1 0.2 0.3]}
-   {Test.assertEqual Merge [[0.4#nil 0.6#[0.5 ~0.2 ~0.3]]] [0.3 ~0.12 ~0.18]}
-   {Test.assertEqual Merge [[0.4#nil 0.6#nil]] nil}
-   {Test.assertEqual Merge [nil] nil}
-
-   % FonduEnchaine
-   {Test.assertEqual FonduEnchaine [[0.5 0.5 0.5] [0.5 0.5 0.5] 3.0 1] [0.5 0.5 0.5]}
-   {Test.assertEqual FonduEnchaine [[0.2 0.4 0.6 0.8 0.2 0.7 0.4] [~0.5 ~0.6 0.4 0.2] 3.0 1] [0.2 0.4 0.6 0.8 0.2 0.05 0.4 0.2]}
-   {Test.assertEqual FonduEnchaine [[0.2 0.4 0.6 0.8] [~0.5 ~0.6 0.4 0.2 0.3 ~0.5] 3.0 1] [0.2 0.4 0.0 0.4 0.2 0.3 ~0.5]}
-   {Test.assertEqual FonduEnchaine [nil [0.5 0.5 0.5] 0.0 1] [0.5 0.5 0.5]}
-   {Test.assertEqual FonduEnchaine [[0.5 0.5 0.5] nil 0.0 1] [0.5 0.5 0.5]}
 
    % Couper
    % fun {Couper Vector Start End SamplingRate}
@@ -128,7 +124,6 @@ local
    {Test.assertEqual Length [{VectorFromInstrument woody ~10 1.0 44100}] 44100}
    {Test.assertEqual Length [{VectorFromInstrument woody ~10 2.0 44100}] 88200}
    {Test.assertEqual Length [{VectorFromInstrument woody   0 0.5 44100}] 22050}
-   
    
    
 in
