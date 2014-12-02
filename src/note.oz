@@ -1,7 +1,8 @@
 % Expose 3 fonctions related to musical notes:
-% - noteToEchantillon: convert a note to an echantillon
-% - hauteur:           count the number of half-steps between a note and a4
-% - buildFromHauteur:  convert a hauteur back to a note in extended notation
+% - noteToEchantillon:  convert a note to an echantillon
+% - hauteur:            count the number of half-steps between a note and a4
+% - buildFromHauteur:   convert a hauteur (note distance from a4 as positive or negative integer) to a note in extended notation
+% - hauteurToFrequency: convert a hauteur (note distance from a4 as positive or negative integer) to a frequency
 
 \ifndef TestNote
 local
@@ -75,7 +76,7 @@ local
 
    % Convert a hauteur back to a note in extended notation
    % Arg: Hauteur - note distance from a4 as positive or negative integer
-   % Returns: note in extended notation like note(name:a octave:3 alteration:none)
+   % Return: note in extended notation like note(name:a octave:3 alteration:none)
    % Complexity: O(1) since NotesList length is bound to 12
    fun {BuildFromHauteur Hauteur}
       Octave = 4 + (Hauteur div NotesListLength)
@@ -87,10 +88,18 @@ local
       N = {Nth NotesList NotePosition} 
       note(nom:N.n octave:Octave alteration:N.a)      
    end
-   
+
+      
+   % Convert an hauteur (note distance from a4 as positive or negative integer) to a frequency
+   % Arg: Hauteur - note distance from a4 as positive or negative integer
+   % Return: frequency of the note in HZ
+   % Complexity: O(1)
+   fun {HauteurToFrequency Hauteur}
+      {Pow 2.0 ({IntToFloat Hauteur}/12.0)} * 440.0
+   end
    
 \ifndef TestNote
 in
-   'export'(noteToEchantillon:NoteToEchantillon hauteur:Hauteur buildFromHauteur:BuildFromHauteur)
+   'export'(noteToEchantillon:NoteToEchantillon hauteur:Hauteur buildFromHauteur:BuildFromHauteur hauteurToFrequency:HauteurToFrequency)
 end
 \endif

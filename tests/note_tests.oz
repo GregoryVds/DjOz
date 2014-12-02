@@ -40,6 +40,11 @@ local
    {Test.assertEqual BuildFromHauteur  ~1 note(nom:g octave:4 alteration:'#')}
    {Test.assertEqual BuildFromHauteur  13 note(nom:a octave:5 alteration:'#')}
    {Test.assertEqual BuildFromHauteur ~25 note(nom:g octave:2 alteration:'#')}
+
+   % HauteurToFrequency
+   {Test.assertEqual HauteurToFrequency 0  440.0}
+   {Test.assertEqual HauteurToFrequency 10 783.99}
+   {Test.assertEqual HauteurToFrequency ~2 392.0}
 in
    {Browse doneTestingNote}
 end

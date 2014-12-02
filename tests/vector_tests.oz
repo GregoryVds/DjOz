@@ -58,39 +58,15 @@ local
    {Test.assertEqual FonduEnchaine [[0.2 0.4 0.6 0.8] [~0.5 ~0.6 0.4 0.2 0.3 ~0.5] 3.0 1] [0.2 0.4 0.0 0.4 0.2 0.3 ~0.5]}
    {Test.assertEqual FonduEnchaine [nil [0.5 0.5 0.5] 0.0 1] [0.5 0.5 0.5]}
    {Test.assertEqual FonduEnchaine [[0.5 0.5 0.5] nil 0.0 1] [0.5 0.5 0.5]}
-   
-   /*
-   % HauteurToFrequency
-   {Test.assertEqual HauteurToFrequency 0  440.0}
-   {Test.assertEqual HauteurToFrequency 10 783.99}
-   {Test.assertEqual HauteurToFrequency ~2 392.0}
-
-   % BuildAudioVector
-   local Vector1 Vector2 in
-      Vector1 = {BuildAudioVector 440.0 0.001 44100}
-      {Test.assertEqual Length [Vector1] 44}
-      {Test.assertEqual Nth [Vector1 10] 0.293316}
-      {Test.assertEqual Nth [Vector1 35] 0.405969}
-      Vector2 = {BuildAudioVector 783.99 0.005 44100}
-      {Test.assertEqual Length [Vector2] 220}
-      {Test.assertEqual Nth [Vector2 10] 0.449393}
-   end
-
-
-
-
-
 
    % Couper
-   % fun {Couper Vector Start End SamplingRate}
    {Test.assertEqual Couper [[0.5 0.5 0.5] ~1.0 4.0 1] [0.0 0.5 0.5 0.5 0.0]}
-   {Test.assertEqual Couper [[0.5 0.5 0.5] 0.0 4.0 1] [0.5 0.5 0.5 0.0]}
+   {Test.assertEqual Couper [[0.5 0.5 0.5]  0.0 4.0 1] [0.5 0.5 0.5 0.0]}
    {Test.assertEqual Couper [[0.5 0.5 0.5] ~2.0 3.0 1] [0.0 0.0 0.5 0.5 0.5]}
    {Test.assertEqual Couper [[0.1 0.2 0.3 0.4 0.5] 1.0 4.0 1] [0.2 0.3 0.4]}
    {Test.assertEqual Couper [nil 1.0 4.0 1] [0.0 0.0 0.0]}
    {Test.assertEqual Couper [[0.5 0.5 0.5] ~5.0 ~2.0 1] [0.0 0.0 0.0]}
-   {Test.assertEqual Couper [[0.5 0.5 0.5] 5.0 8.0 1] [0.0 0.0 0.0]}
-
+   {Test.assertEqual Couper [[0.5 0.5 0.5]  5.0  8.0 1] [0.0 0.0 0.0]}
 
    % Echo
    {Test.assertEqual Echo [[0.2 0.4 0.6] 4.0  3  1.0  1] [0.05 0.1 0.15 0.0 0.05 0.1 0.15 0.0 0.05 0.1 0.15 0.0 0.05 0.1 0.15]}
@@ -104,18 +80,8 @@ local
    {Test.assertEqual Echo [[0.2 0.4 0.6] 1.0  2  0.0  1] [0.2 0.4 0.6 0.0 0.0]} 
    {Test.assertEqual Echo [nil           1.0  3  1.0  1] [0.0 0.0 0.0]}
    {Test.assertEqual Echo [nil           2.0  3  1.0  1] [0.0 0.0 0.0 0.0 0.0 0.0]}
-   */
 
-   % BuildFromVoice
-   local Vector1 in
-      Vector1 = {VectorFromVoice [echantillon(hauteur:10 duree:0.00025 instrument:none) echantillon(hauteur:~2 duree:0.0005 instrument:none)]}
-      {Test.assertEqual Length [Vector1] 33}
-      {Test.assertEqual Nth [Vector1 10] 0.449393}
-      {Test.assertEqual Nth [Vector1 20] 0.240876}
-   end
-   
-   
-   % FilePath
+    % FilePath
    {Test.assertEqual FilePath [note(nom:a octave:3 alteration:none) woody]      {VirtualString.toAtom CWD#'wave/instruments/woody_a3.wav'}}
    {Test.assertEqual FilePath [note(nom:a octave:3 alteration:'#') woody]       {VirtualString.toAtom CWD#'wave/instruments/woody_a3#.wav'}}
    {Test.assertEqual FilePath [note(nom:g octave:2 alteration:'#') '8bit_stab'] {VirtualString.toAtom CWD#'wave/instruments/8bit_stab_g2#.wav'}}
@@ -125,6 +91,24 @@ local
    {Test.assertEqual Length [{VectorFromInstrument woody ~10 2.0 44100}] 88200}
    {Test.assertEqual Length [{VectorFromInstrument woody   0 0.5 44100}] 22050}
    
+   % Build
+   local Vector1 Vector2 in
+      Vector1 = {Build 440.0 0.001 44100}
+      {Test.assertEqual Length [Vector1] 44}
+      {Test.assertEqual Nth [Vector1 10] 0.293316}
+      {Test.assertEqual Nth [Vector1 35] 0.405969}
+      Vector2 = {Build 783.99 0.005 44100}
+      {Test.assertEqual Length [Vector2] 220}
+      {Test.assertEqual Nth [Vector2 10] 0.449393}
+   end
+
+   % VectorFromVoice
+   local Vector1 in
+      Vector1 = {VectorFromVoice [echantillon(hauteur:10 duree:0.00025 instrument:none) echantillon(hauteur:~2 duree:0.0005 instrument:none)] 44100}
+      {Test.assertEqual Length [Vector1] 33}
+      {Test.assertEqual Nth [Vector1 10] 0.449393}
+      {Test.assertEqual Nth [Vector1 20] 0.240876}
+   end
    
 in
    {Browse doneTestingVector}

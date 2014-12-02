@@ -3,11 +3,13 @@
 % - repeat:             repeat a musical vector X times
 % - repeatUpToDuration: repeat a musical vector up to a fixed duration and truncate the rest
 % - clip:               clip a musical vector so that all its values are comprised in the specified interval
-% - fondu:              fade in the start and fade out the end of a musical vector
 % - merge:              merge multiple musical vectors together by computing the weigthed sum of the vectors to merge (where the weight is the intensity)
+% - fondu:              fade in the start and fade out the end of a musical vector
 % - fonduEnchaine:      concatenate 2 musical vectors together and fade out the end of the first one while fading in
 %                       the start of the second one for a smooth transition over a specified duration
 % - couper:             returns all the values in a time interval in a musical vector. If the time interval extends beyond the vector it return 0.0's on that portion of the interval
+% - echo:               generate an echo by repeating an audio vector multiple times at fixed intervals with a decay applied on the intensity of the repetitions
+% - vectorFromVoice:    build an audio vector from a voice
 \ifndef TestVector
 local
 \endif
@@ -17,7 +19,7 @@ local
    % Arg: Vector - a musical vector
    %      Times - an integer (>=0) the gives the final number of repetitions.
    % Return: the vector passed in argument repeated X times. If X=0 then return nil.
-   % Complexity: O(n*m) where n is the length of the vector and m the number of repetitions
+   % Complexity: O(VectorLength*Times)
    fun {Repeat Vector Times}
       {Utilities.repeat Vector Times}
    end
@@ -28,7 +30,7 @@ local
    %      Duration - the final duration of the vector as float (>=0)
    %      SamplingRate - the number of values per second as integer (>=0)
    % Return: the repeated vector lasting Duration seconds
-   % Complexity: O(n) where n is Duration*SamplingRate
+   % Complexity: O(Duration*SamplingRate)
    fun {RepeatUpToDuration Vector Duration SamplingRate}
       {Utilities.repeatUpToElementsCount Vector {FloatToInt Duration*{IntToFloat SamplingRate}}}
    end
@@ -39,7 +41,7 @@ local
    %      Low - the lower bound as float (>= -1 & <= 1)
    %      High - the upper bound as float (>= -1 & <= 1)
    % Return: the clipped vector where values outside the interval are rounded to the closest bound
-   % Complexity: O(n) where n is the vector length
+   % Complexity: O(VectorLength)
    fun {Clip Vector Low High}
       fun {ClipElement Element}
 	 {Max {Min Element High} Low}
@@ -61,7 +63,7 @@ local
    %      End - interval on which to fade the vector at the end as float (>= 0)
    %      SamplingRate - the number of values per second as integer (>=0)
    % Return: a faded musical vector
-   % Complexity: O(n) where n is the vector length
+   % Complexity: O(VectorLength*SamplingRate)
    fun {Fondu Vector Start End SamplingRate}
       VectorLength       = {Length Vector}
       StartElementsCount = {FloatToInt Start*{IntToFloat SamplingRate}}
@@ -86,7 +88,7 @@ local
    % Arg: Vector - a musical vector
    %      Factor - float
    % Return: the vector where each element is multiplied by the factor
-   % Complexity: O(n) where n is the vector length
+   % Complexity: O(VectorLength)
    fun {Multiply Vector Factor}
       {Map Vector fun {$ Elem} Elem * Factor end } 
    end
@@ -121,7 +123,7 @@ local
    % Merge multiple musical vectors together by computing the weigthed sum of the vectors to merge (where the weight is the intensity)
    % Arg: VectorsToMerge - a list a pairs with Intensity#MusicalVector where the sum the of intensities (floats) <= 1
    % Return: a single musical vector
-   % Complexity: O(n-1*m) where n is the number of vector to merge and m is roughly the minimum of the vectors to merge
+   % Complexity: O(n*m) where n is the number of vector to merge (-1) and m is roughly the minimum length of the vectors to merge
    fun {Merge VectorsToMerge}
       fun {RecMerge VectorsToMerge Acc}
 	 case VectorsToMerge
@@ -141,7 +143,7 @@ local
    %      Duration - duration of the fade in/fade out transition between the 2 vectors
    %      SamplingRate - the number of values per second as integer (>=0)
    % Return: a single musical vector
-   % Complexity: O(n) where n is roughly the average length of the 2 vectors.
+   % Complexity: O(n*SamplingRate) where n is roughly the average length of the 2 vectors.
    fun {FonduEnchaine Vector1 Vector2 Duration SamplingRate}
       V1Start V1Fondu V2Fondu V2End 
       FonduElements = {FloatToInt Duration*{IntToFloat SamplingRate}}
@@ -159,7 +161,7 @@ local
    %      End - the end of the time interval relative the end of the vector
    %      SamplingRate - the number of values per second as integer (>=0)
    % Return: a single musical vector sliced out of the original one.
-   % Complexity: 
+   % Complexity: O(Interval*SamplingRate) where Interval = End - Start
    fun {Couper Vector Start End SamplingRate}
       SamplingFloat = {IntToFloat SamplingRate}
       IntervalStart = {FloatToInt Start*SamplingFloat}
@@ -183,6 +185,14 @@ local
    end
 
 
+   % Generate an echo by repeating an audio vector multiple times at fixed intervals with a decay applied on the intensity of the repetitions 
+   % Arg: Vector - the original audio vector
+   %      Delay - float (>= 0) that specify the time interval in seconds between 2 echos
+   %      Repetition - integer (>= 0) that specify the number of repetitions
+   %      Decay - float (>= 0) that specify the decay factor at each echo
+   %      SamplingRate - the number of values per second as integer (>=0)
+   % Return: a single musical vector that combines the original vector and the echoed vectors.
+   % Complexity: O(n*m) where n is the number of repetitions and m is [Sum where X goes from 1 to Repetition of VectorLength+X*Delay*SamplingRate]/Repetition
    fun {Echo Vector Delay Repetition Decay SamplingRate}
       BaseVectorDuration = {IntToFloat {Length Vector}}/{IntToFloat SamplingRate}
       fun {EchoRec Acc Repetition Counter IntensityDivisor}
@@ -199,18 +209,15 @@ local
       {EchoRec Vector Repetition 0 1.0}
    end
 
-   % Convert an hauteur to a frequency
-   % Arg: Hauteur as integer (+ or -)
-   % Return: A frequency as float >= 0
-   fun {HauteurToFrequency Hauteur}
-      {Pow 2.0 ({IntToFloat Hauteur}/12.0)} * 440.0
-   end
-   
-   % Build an audio vector for a frequency and a duree
-   % Arg: Frequency as float (>= 0) and duree as float (>= 0)
-   % Return: An audio vector (list of floats between -1 and 1) of size Duree*Projet.hz 
-   fun {BuildAudioVector Frequency Duree SamplingRate}
-      Pi   = 3.14159265358979323846 %TODO: How to get Pi in a clever way?
+
+   % Build an audio vector from a frequency, a duree and a sampling rate
+   % Arg: Frequency - float (>= 0) 
+   %      Duree - float (>= 0)
+   %      SamplingRate - the number of values per second as integer (>=0)
+   % Return: An audio vector of size Duree*SamplingRate
+   % Complexity: O(Duree*SamplingRate)
+   fun {Build Frequency Duree SamplingRate}
+      Pi   = 3.14159265358979323846
       Temp = (2.0*Pi*Frequency)/{IntToFloat SamplingRate}
       ValuesCount = {FloatToInt Duree*{IntToFloat SamplingRate}}
       fun {AudioVector I}
@@ -220,32 +227,45 @@ local
       {AudioVector 1}
    end
 
-   fun {SmoothenVector Vector Duration SamplingRate}
-      Smoothing = 0.15*Duration
-   in
-      {Fondu Vector Smoothing Smoothing SamplingRate}
-   end
-   
-   fun {VectorFromEnchantillon Frequency Duree SamplingRate}
-      {SmoothenVector {BuildAudioVector Frequency Duree SamplingRate} Duree SamplingRate}
-   end
 
+   % Build the path to a .wav audio file a note played by an instrument
+   % Arg: Note - note in extended notation 
+   %      Instrument - instrument as atom like 'woody'
+   % Return: the path to the file as an atom
+   % Complexity: O(1)
    fun {FilePath Note Instrument}
       {VirtualString.toAtom CWD#'wave/instruments/'#Instrument#'_'#Note.nom#Note.octave#(if Note.alteration == none then '' else "#" end)#'.wav'}
    end
 
+
+   % Build an audio vector for an instrument
+   % Arg: Instrument - instrument as atom like 'woody'
+   %      Hauteur - note distance from a4 as positive or negative integer
+   %      Duree - float (>= 0)
+   %      SamplingRate - the number of values per second as integer (>=0)
+   % Return: an audio vector
+   % Complexity: O(SamplingRate*Duree)
    fun {VectorFromInstrument Instrument Hauteur Duree SamplingRate}
       InstrumentVector = {Projet.readFile {FilePath {Note.buildFromHauteur Hauteur} Instrument}}
    in
-      {SmoothenVector {RepeatUpToDuration InstrumentVector Duree SamplingRate} Duree SamplingRate}      
+      {Fondu {RepeatUpToDuration InstrumentVector Duree SamplingRate} 0.15*Duree 0.15*Duree SamplingRate}      
    end
 
-   fun {VectorFromVoice Voice}
+
+   % Build an audio vector from a voice
+   % Arg: Voice - a flat list of echantillons
+   % Return: an audio vector
+   % Complexity: O(VoiceTotalDuree*SamplingRate)
+   fun {VectorFromVoice Voice SamplingRate}
+      fun {VectorFromEnchantillon Frequency Duree SamplingRate}
+	 {Fondu {Build Frequency Duree SamplingRate} 0.15*Duree 0.15*Duree SamplingRate}
+      end
+
       fun {EchantillonToAudioVector Echantillon}
 	 case Echantillon
-	 of silence(duree:Duree)                                           then {VectorFromEnchantillon 0.0 Duree Projet.hz}
-	 [] echantillon(hauteur:Hauteur duree:Duree instrument:none)       then {VectorFromEnchantillon {HauteurToFrequency Hauteur} Duree Projet.hz}
-	 [] echantillon(hauteur:Hauteur duree:Duree instrument:Instrument) then {VectorFromInstrument Instrument Hauteur Duree Projet.hz}
+	 of silence(duree:Duree)                                           then {VectorFromEnchantillon 0.0 Duree SamplingRate}
+	 [] echantillon(hauteur:Hauteur duree:Duree instrument:none)       then {VectorFromEnchantillon {Note.hauteurToFrequency Hauteur} Duree SamplingRate}
+	 [] echantillon(hauteur:Hauteur duree:Duree instrument:Instrument) then {VectorFromInstrument Instrument Hauteur Duree SamplingRate}
 	 end
       end
    in

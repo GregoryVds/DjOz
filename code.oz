@@ -51,7 +51,7 @@ in
       
       fun {MixMorceau Morceau}
 	 case Morceau
-	 of voix(Voix)                                 then {Vector.vectorFromVoice Voix}
+	 of voix(Voix)                                 then {Vector.vectorFromVoice Voix Projet.hz}
 	 [] partition(Part)                            then {MixMorceau voix({Interprete Part}) }  
 	 [] wave(FileName)                             then {Projet.readFile CWD#FileName}
 	 [] renverser(Zik)                             then {Reverse {Mix Interprete Zik}}
