@@ -86,13 +86,13 @@ local
       V10 = {Mix Interprete [wave('wave/animaux/cow.wav')]}
       {Test.assertEqual IsList [V10] true}
   
-      V11 = {Mix Interprete [echo(delai:1.0 [partition([a b2 [c3]])] )]}
+      V11 = {Mix Interprete [echo(delai:1.0 [partition([a b2 [c3]])])]}
       {Test.assertEqual Length [V11] 176400}      
 
       V12 = {Mix Interprete [echo(delai:1.0 decadence:1.4 [voix([echantillon(hauteur:2 duree:0.5 instrument:none) echantillon(hauteur:~10 duree:2.5 instrument:none)])] )]}
       {Test.assertEqual Length [V12] 176400}
 
-      V13 = {Mix Interprete [echo(delai:1.0 decadence:1.4 repetition:2 [voix([echantillon(hauteur:2 duree:0.5 instrument:none) echantillon(hauteur:~10 duree:2.5 instrument:none)])] )]}
+      V13 = {Mix Interprete [echo(delai:1.0 decadence:1.4 repetition:2 [voix([echantillon(hauteur:2 duree:0.5 instrument:none) echantillon(hauteur:~10 duree:2.5 instrument:none)])])]}
       {Test.assertEqual Length [V13] 220500}
 
       V14 = {Mix Interprete [echo(delai:1.0 [partition([a b2 [c3]])])]}

@@ -61,13 +61,14 @@ in
 	 [] fondu_enchaine(duree:Duree Zik1 Zik2)      then {Vector.fonduEnchaine {Mix Interprete Zik1} {Mix Interprete Zik2} Duree Projet.hz}
 	 [] couper(debut:Start fin:End Zik)            then {Vector.couper {Mix Interprete Zik} Start End Projet.hz}
 	 [] merge(ZiksToMerge)                         then {Vector.merge {MixMusicsToMerge ZiksToMerge}}
+	    [] nil then nil
 	 end
       end
    in
       {Flatten {Map Music MixMorceau}}
    end
 
-   {Browse {Projet.run Mix Interprete {Projet.load CWD#'example.dj.oz'} CWD#'out.wav'}}
+   {Browse {Projet.run Mix Interprete {Projet.load CWD#'exemple.dj.oz'} CWD#'out.wav'}}
    
 \ifndef TestCode
 end

@@ -1,4 +1,3 @@
-% Hymne à la joie.
 local
    Base  = [c#3 d4 c#3]
    Quick = [etirer(facteur:(2.0/3.0) Base)]
@@ -9,7 +8,6 @@ local
    TopQuick = [etirer(facteur:(2.0/3.0) Top)]
    Chorus = [a3 Top a3 TopQuick c#4 Top c#4 TopQuick e4 Top e4 Top]
    Partition = [Intro Chorus]
-   % Ceci n'est pas une musique
 in
    [partition(Partition)]
 end
