@@ -7,10 +7,10 @@ local
 \endif
    CWD         = {Property.condGet 'testcwd' '/Users/Greg/Desktop/Projet2014/'}
    [Projet]    = {Link [CWD#'Projet2014_mozart2.ozf']}
-   ListHelpers = \insert /Users/Greg/Desktop/Projet2014/lib/list_helpers.oz
-   Note        = \insert /Users/Greg/Desktop/Projet2014/src/note.oz
-   Voice       = \insert /Users/Greg/Desktop/Projet2014/src/voice.oz
-   Vector      = \insert /Users/Greg/Desktop/Projet2014/src/vector.oz
+   ListHelpers = \insert lib/list_helpers.oz % You might want to to use an absolute path for testing purpose.
+   Note        = \insert src/note.oz         % You might want to to use an absolute path for testing purpose.
+   Voice       = \insert src/voice.oz        % You might want to to use an absolute path for testing purpose.
+   Vector      = \insert src/vector.oz       % You might want to to use an absolute path for testing purpose.
    
 \ifndef TestCode
 in
